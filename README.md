@@ -1,2 +1,5 @@
-### Hexlet tests and linter status:
-[![Actions Status](https://github.com/YodJI27/js-async-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/YodJI27/js-async-project-4/actions)
+## Пример работы
+
+### С указанием папки
+
+![Demo](page-loader.gif)

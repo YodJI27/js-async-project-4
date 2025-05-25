@@ -1,0 +1,32 @@
+{
+  "dependencies": {
+    "axios": "^1.9.0",
+    "commander": "^14.0.0",
+    "fs-extra": "^11.3.0",
+    "path": "^0.12.7",
+    "pipx": "^1.0.1"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+    "@jest/globals": "^29.7.0",
+    "eslint": "^9.27.0",
+    "jest": "^29.7.0",
+    "nock": "^14.0.4"
+  },
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "page-loader": "src/cli.js"
+  },
+  "description": "[![Actions Status](https://github.com/YodJI27/js-async-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/YodJI27/js-async-project-4/actions)",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {}
+  },
+  "author": "",
+  "license": "ISC"
+}
