@@ -7,60 +7,109 @@ import * as cheerio from 'cheerio';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const generateFilename = (url, extension = 'html') => {
-    const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
-    // Удаляем расширение из URL, если оно уже есть
-    const urlWithoutExt = urlWithoutProtocol.replace(/\.\w+$/, '');
-    const filename = urlWithoutExt.replace(/[^a-zA-Z0-9]/g, '-') + `.${extension}`;
-    return filename;
+const isLocalResource = (resourceUrl, pageUrl) => {
+    try {
+      const pageDomain = new URL(pageUrl).hostname;
+      const resourceDomain = new URL(resourceUrl, pageUrl).hostname;
+      // Учитываем поддомены одного домена
+      return resourceDomain === pageDomain || 
+             resourceDomain.endsWith('.' + pageDomain);
+    } catch {
+      return false;
+    }
   };
 
-const downloadResource = async (url, outputDir) => {
-  try {
-    const response = await axios.get(url, { responseType: 'arraybuffer' });
-    const resourceFilename = generateFilename(url, getExtensionFromUrl(url));
-    const resourcePath = path.join(outputDir, resourceFilename);
-    await fs.writeFile(resourcePath, response.data);
-    console.log(`Downloaded image: ${resourcePath}`);
-    return resourceFilename;
-  } catch (error) {
-    throw new Error(`Failed to download resource ${url}: ${error.message}`);
-  }
+const generateFilename = (url, extension = 'html') => {
+  const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
+  const urlWithoutExt = urlWithoutProtocol.replace(/\.\w+$/, '');
+  const filename = urlWithoutExt.replace(/[^a-zA-Z0-9]/g, '-') + `.${extension}`;
+  return filename;
 };
+
+// const downloadResource = async (url, outputDir) => {
+//   try {
+//     const response = await axios.get(url, { responseType: 'arraybuffer' });
+//     const resourceFilename = generateFilename(url, getExtensionFromUrl(url));
+//     const resourcePath = path.join(outputDir, resourceFilename);
+//     await fs.writeFile(resourcePath, response.data);
+//     console.log(`Downloaded: ${resourcePath}`);
+//     return resourceFilename;
+//   } catch (error) {
+//     throw new Error(`Failed to download resource ${url}: ${error.message}`);
+//   }
+// };
 
 const getExtensionFromUrl = (url) => {
-    const urlObj = new URL(url);
-    const pathname = urlObj.pathname;
-    const lastDotIndex = pathname.lastIndexOf('.');
-    if (lastDotIndex === -1) return 'bin'; // Возвращаем 'bin', если расширения нет
-    return pathname.slice(lastDotIndex + 1).toLowerCase();
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      
+      // Если URL заканчивается на /, считаем это HTML
+      if (pathname.endsWith('/')) return 'html';
+      
+      const lastDotIndex = pathname.lastIndexOf('.');
+      const lastSlashIndex = pathname.lastIndexOf('/');
+
+      if (lastDotIndex === -1 || lastDotIndex < lastSlashIndex) {
+        return pathname.endsWith('/courses') ? 'html' : 'bin';
+      }
+      
+      return pathname.slice(lastDotIndex + 1).toLowerCase();
+    } catch {
+      return 'bin';
+    }
   };
 
-const processHtml = async (html, pageUrl, outputDir) => {
-  const $ = cheerio.load(html);
-  const resourcesDirName = generateFilename(pageUrl).replace('.html', '_files');
-  const resourcesDir = path.join(outputDir, resourcesDirName);
-  await fs.mkdir(resourcesDir, { recursive: true });
-
-  console.log(`Created directory: ${resourcesDir}`); // Сообщение о создании директории
-
-  const imgPromises = $('img').map(async (i, img) => {
-    const src = $(img).attr('src');
-    if (!src) return;
-
-    try {
-      const absoluteUrl = new URL(src, pageUrl).toString();
-      const resourceFilename = await downloadResource(absoluteUrl, resourcesDir);
-      $(img).attr('src', path.join(resourcesDirName, resourceFilename));
-    } catch (error) {
-      console.error(error.message);
-    }
-  }).get();
-
-  await Promise.all(imgPromises);
-
-  return $.html();
-};
+  const processHtml = async (html, pageUrl, outputDir) => {
+    const $ = cheerio.load(html);
+    const resourcesDirName = generateFilename(pageUrl).replace('.html', '_files');
+    const resourcesDir = path.join(outputDir, resourcesDirName);
+    await fs.mkdir(resourcesDir, { recursive: true });
+  
+    const resourceTags = [
+        { selector: 'img', attr: 'src' },
+        { selector: 'link', attr: 'href' },
+        { selector: 'script', attr: 'src' }
+    ];
+  
+    const downloadPromises = resourceTags.flatMap(({ selector, attr, forceHtml = false }) => {
+      return $(selector).map(async (i, el) => {
+        const resourceUrl = $(el).attr(attr);
+        if (!resourceUrl) return;
+  
+        try {
+          const absoluteUrl = new URL(resourceUrl, pageUrl).toString();
+          if (!isLocalResource(absoluteUrl, pageUrl)) return;
+  
+          const extension = $(el).attr('rel') === 'canonical' 
+          ? 'html' 
+          : getExtensionFromUrl(absoluteUrl);
+          const filename = generateFilename(absoluteUrl, extension);
+          const resourcePath = path.join(resourcesDir, filename);
+  
+          try {
+            const response = await axios.get(absoluteUrl, { 
+              responseType: 'arraybuffer'
+            });
+            await fs.writeFile(resourcePath, response.data);
+            console.log(`Downloaded: ${filename}`);
+            $(el).attr(attr, path.join(resourcesDirName, filename));
+          } catch (error) {
+            if (error.response?.status === 404) {
+              console.warn(`Resource not found: ${absoluteUrl}`);
+            } else {
+              console.error(`Error downloading ${absoluteUrl}: ${error.message}`);
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to process resource ${resourceUrl}: ${error.message}`);
+        }
+      }).get();
+    });
+  
+    await Promise.all(downloadPromises);
+    return $.html();
+  };
 
 const downloadPage = async (url, outputDir = process.cwd()) => {
   const normalizedOutputDir = path.normalize(outputDir);
