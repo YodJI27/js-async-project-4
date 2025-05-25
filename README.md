@@ -4,7 +4,6 @@
 [![Actions Status](https://github.com/YodJI27/js-async-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/YodJI27/js-async-project-4/actions)
 [![ESLint](https://img.shields.io/badge/ESLint-passing-brightgreen)](https://eslint.org/)
 [![License](https://img.shields.io/github/license/YodJI27/js-async-project-4)](https://github.com/YodJI27/js-async-project-4/blob/main/LICENSE)
-[![Webpack Build](https://github.com/YodJI27/js-async-project-4/actions/workflows/webpack.yml/badge.svg)](https://github.com/YodJI27/js-async-project-4/actions)
 
 
 
