@@ -1,10 +1,16 @@
+// page-loader.test.js
 import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import axios from 'axios';
 import nock from 'nock';
 import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
+import debug from 'debug';
 import downloadPage from '../src/page-loader.js';
+
+// Включаем логирование для тестов
+debug.enable('page-loader,axios,nock');
+const log = debug('page-loader:test');
 
 describe('page-loader', () => {
   let tempDir;
@@ -34,8 +40,10 @@ describe('page-loader', () => {
     </html>`;
 
   beforeEach(async () => {
+    log('Creating temp directory');
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
     
+     log('Setting up nock mocks');
     nock(baseUrl)
       .get('/courses')
       .reply(200, pageContent)
@@ -50,10 +58,12 @@ describe('page-loader', () => {
   });
 
   afterEach(() => {
+     log('Cleaning nock mocks');
     nock.cleanAll();
   });
 
   test('should generate correct filename', async () => {
+    log('Running filename generation test');
     const filepath = await downloadPage(url, tempDir);
     expect(filepath).toBe(path.join(tempDir, expectedFilename));
   });

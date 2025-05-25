@@ -1,0 +1,1 @@
+import{a as o}from"./js.cookie-Cz0CWeBA.js";document.addEventListener("DOMContentLoaded",()=>{const e=document.getElementById("may-promo-banner"),n=document.getElementById("may-promo-banner-close-btn");n==null||n.addEventListener("click",()=>{e==null||e.remove(),o.set("mayPromoBannerClosed","hide",{expires:1})})});

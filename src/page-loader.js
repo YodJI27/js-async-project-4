@@ -4,6 +4,26 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import * as cheerio from 'cheerio';
+import debug from 'debug';
+
+// Настройка логирования
+const log = debug('page-loader');
+const axiosLog = debug('axios');
+const nockLog = debug('nock');
+
+// Включение логирования для axios
+axios.interceptors.request.use((config) => {
+  axiosLog('Request:', config.method, config.url);
+  return config;
+});
+
+axios.interceptors.response.use((response) => {
+  axiosLog('Response:', response.status, response.config.url);
+  return response;
+}, (error) => {
+  axiosLog('Error:', error.message, error.config?.url);
+  return Promise.reject(error);
+});
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -23,21 +43,9 @@ const generateFilename = (url, extension = 'html') => {
   const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
   const urlWithoutExt = urlWithoutProtocol.replace(/\.\w+$/, '');
   const filename = urlWithoutExt.replace(/[^a-zA-Z0-9]/g, '-') + `.${extension}`;
+  log(`Generated filename: ${filename} for URL: ${url}`);
   return filename;
 };
-
-// const downloadResource = async (url, outputDir) => {
-//   try {
-//     const response = await axios.get(url, { responseType: 'arraybuffer' });
-//     const resourceFilename = generateFilename(url, getExtensionFromUrl(url));
-//     const resourcePath = path.join(outputDir, resourceFilename);
-//     await fs.writeFile(resourcePath, response.data);
-//     console.log(`Downloaded: ${resourcePath}`);
-//     return resourceFilename;
-//   } catch (error) {
-//     throw new Error(`Failed to download resource ${url}: ${error.message}`);
-//   }
-// };
 
 const getExtensionFromUrl = (url) => {
     try {
@@ -60,10 +68,12 @@ const getExtensionFromUrl = (url) => {
     }
   };
 
-  const processHtml = async (html, pageUrl, outputDir) => {
+const processHtml = async (html, pageUrl, outputDir) => {
+    log(`Processing HTML for URL: ${pageUrl}`);
     const $ = cheerio.load(html);
     const resourcesDirName = generateFilename(pageUrl).replace('.html', '_files');
     const resourcesDir = path.join(outputDir, resourcesDirName);
+    log(`Creating resources directory: ${resourcesDir}`);
     await fs.mkdir(resourcesDir, { recursive: true });
   
     const resourceTags = [
@@ -79,30 +89,35 @@ const getExtensionFromUrl = (url) => {
   
         try {
           const absoluteUrl = new URL(resourceUrl, pageUrl).toString();
-          if (!isLocalResource(absoluteUrl, pageUrl)) return;
+          if (!isLocalResource(absoluteUrl, pageUrl)) {
+            log(`Skipping external resource: ${absoluteUrl}`);
+            return;
+          }
   
           const extension = $(el).attr('rel') === 'canonical' 
-          ? 'html' 
-          : getExtensionFromUrl(absoluteUrl);
+            ? 'html' 
+            : getExtensionFromUrl(absoluteUrl);
           const filename = generateFilename(absoluteUrl, extension);
           const resourcePath = path.join(resourcesDir, filename);
   
           try {
+            log(`Downloading resource: ${absoluteUrl}`);
             const response = await axios.get(absoluteUrl, { 
               responseType: 'arraybuffer'
             });
             await fs.writeFile(resourcePath, response.data);
+            log(`Resource saved: ${resourcePath}`);
             console.log(`Downloaded: ${filename}`);
             $(el).attr(attr, path.join(resourcesDirName, filename));
           } catch (error) {
             if (error.response?.status === 404) {
-              console.warn(`Resource not found: ${absoluteUrl}`);
+              log(`Resource not found (404): ${absoluteUrl}`);
             } else {
-              console.error(`Error downloading ${absoluteUrl}: ${error.message}`);
+              log(`Error downloading resource ${absoluteUrl}: ${error.message}`);
             }
           }
         } catch (error) {
-          console.error(`Failed to process resource ${resourceUrl}: ${error.message}`);
+          log(`Failed to process resource ${resourceUrl}: ${error.message}`);
         }
       }).get();
     });
@@ -112,6 +127,7 @@ const getExtensionFromUrl = (url) => {
   };
 
 const downloadPage = async (url, outputDir = process.cwd()) => {
+  log(`Starting download for URL: ${url} to directory: ${outputDir}`);
   const normalizedOutputDir = path.normalize(outputDir);
   
   try {
@@ -119,14 +135,17 @@ const downloadPage = async (url, outputDir = process.cwd()) => {
     const filename = generateFilename(url);
     const filepath = path.join(normalizedOutputDir, filename);
     
+    log(`Creating output directory: ${normalizedOutputDir}`);
     await fs.mkdir(normalizedOutputDir, { recursive: true });
     
     const processedHtml = await processHtml(response.data, url, normalizedOutputDir);
     await fs.writeFile(filepath, processedHtml);
     
+    log(`Page successfully saved to: ${filepath}`);
     console.log(`\nPage saved to: ${filepath}`);
     return filepath;
   } catch (error) {
+    log(`Failed to download page ${url}: ${error.message}`);
     throw new Error(`Failed to download page ${url}: ${error.message}`);
   }
 };
