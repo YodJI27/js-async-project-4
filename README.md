@@ -11,3 +11,7 @@
 ### Шаг 3
 
 ![Demo](page-loader-3.gif)
+
+### Шаг 4 (DEBUG)
+
+![Demo](page-loader-4.gif)
