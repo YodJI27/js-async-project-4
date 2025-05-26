@@ -10,15 +10,15 @@ const log = debug('page-loader')
 const axiosLog = debug('axios')
 
 // Включение логирования для axios
-axios.interceptors.request.use(config => {
+axios.interceptors.request.use((config) => {
   axiosLog('Request:', config.method, config.url)
   return config
 })
 
-axios.interceptors.response.use(response => {
+axios.interceptors.response.use((response) => {
   axiosLog('Response:', response.status, response.config.url)
   return response
-}, error => {
+}, (error) => {
   axiosLog('Error:', error.message, error.config?.url)
   return Promise.reject(error)
 })
@@ -27,8 +27,8 @@ const isLocalResource = (resourceUrl, pageUrl) => {
   try {
     const pageDomain = new URL(pageUrl).hostname
     const resourceDomain = new URL(resourceUrl, pageUrl).hostname
-    return resourceDomain === pageDomain ||
-           resourceDomain.endsWith('.' + pageDomain)
+    return resourceDomain === pageDomain 
+          || resourceDomain.endsWith('.' + pageDomain)
   } catch {
     return false
   }
@@ -42,7 +42,7 @@ const generateFilename = (url, extension = 'html') => {
   return filename
 }
 
-const getExtensionFromUrl = url => {
+const getExtensionFromUrl = (url) => {
   try {
     const urlObj = new URL(url)
     const pathname = urlObj.pathname
@@ -115,7 +115,7 @@ const processHtml = async (html, pageUrl, outputDir) => {
     }).get().filter(Boolean)
   })
 
-  const tasks = new Listr(resources.map(resource => ({
+  const tasks = new Listr(resources.map((resource) => ({
     title: `Downloading ${resource.url}`,
     task: async () => {
       try {

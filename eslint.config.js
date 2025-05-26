@@ -18,16 +18,13 @@ export default [
       },
     },
     rules: {
-      '@stylistic/semi': ['error', 'never'],          
-      '@stylistic/indent': ['error', 2],              
-      '@stylistic/eol-last': ['error', 'always'],     
-      '@stylistic/no-trailing-spaces': 'error',
-      '@stylistic/brace-style': ['error', '1tbs'],
-      '@stylistic/comma-dangle': ['error', 'always-multiline'],
-      '@stylistic/arrow-parens': ['error', 'as-needed'],
-      'no-console': 'off',
-      'no-unused-vars': 'off',
-      'no-undef': 'error',
+    '@stylistic/arrow-parens': 'off',
+    '@stylistic/operator-linebreak': 'off',
+    '@stylistic/indent-binary-ops': 'off',
+    'no-unused-vars': 'off',
+
+    '@stylistic/brace-style': ['error', '1tbs'],
+    '@stylistic/no-trailing-spaces': 'error',
     },
   },
 ]

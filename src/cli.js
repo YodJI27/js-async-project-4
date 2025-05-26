@@ -11,7 +11,7 @@ program
   .version('1.0.0')
   .argument('<url>', 'url to download')
   .option('-o, --output [dir]', 'output dir', process.cwd())
-  .action(async url => {
+  .action(async (url) => {
     try {
       const options = program.opts()
       const filepath = await downloadPage(url, options.output)
