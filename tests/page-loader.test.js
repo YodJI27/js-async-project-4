@@ -6,7 +6,7 @@ import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
 import debug from 'debug';
-import downloadPage from '../src/page-loader.js';
+import downloadPage from '../src/index.js';
 
 // Включаем логирование для тестов
 debug.enable('page-loader,axios,nock');

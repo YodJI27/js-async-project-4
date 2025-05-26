@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import downloadPage from './page-loader.js';
+import downloadPage from './index.js';
 
 const program = new Command();
 
