@@ -27,8 +27,8 @@ const isLocalResource = (resourceUrl, pageUrl) => {
   try {
     const pageDomain = new URL(pageUrl).hostname
     const resourceDomain = new URL(resourceUrl, pageUrl).hostname
-    return resourceDomain === pageDomain 
-          || resourceDomain.endsWith('.' + pageDomain)
+    return resourceDomain === pageDomain
+      || resourceDomain.endsWith('.' + pageDomain)
   } catch {
     return false
   }
@@ -115,7 +115,7 @@ const processHtml = async (html, pageUrl, outputDir) => {
     }).get().filter(Boolean)
   })
 
-  const tasks = new Listr(resources.map((resource) => ({
+  const tasks = new Listr(resources.map(resource => ({
     title: `Downloading ${resource.url}`,
     task: async () => {
       try {
@@ -142,7 +142,7 @@ const downloadPage = async (url, outputDir = process.cwd()) => {
     // Проверка доступности директории
     try {
       await fs.access(outputDir, fs.constants.W_OK)
-    } catch (err) {
+    } catch {
       throw new Error(`No write access to directory: ${outputDir}`)
     }
 

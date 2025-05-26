@@ -91,7 +91,7 @@ describe('page-loader', () => {
       `${expectedResourcesDir}/ru-hexlet-io-courses.html`,
     ]
 
-    expectedPaths.forEach(path => {
+    expectedPaths.forEach((path) => {
       expect(normalizedHtml).toContain(path)
     })
 

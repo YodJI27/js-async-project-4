@@ -18,13 +18,12 @@ export default [
       },
     },
     rules: {
-    '@stylistic/arrow-parens': 'off',
-    '@stylistic/operator-linebreak': 'off',
-    '@stylistic/indent-binary-ops': 'off',
-    'no-unused-vars': 'off',
-
-    '@stylistic/brace-style': ['error', '1tbs'],
-    '@stylistic/no-trailing-spaces': 'error',
+      '@stylistic/arrow-parens': 'off',
+      '@stylistic/operator-linebreak': 'off',
+      '@stylistic/indent-binary-ops': 'off',
+      'no-unused-vars': 'off',
+      '@stylistic/brace-style': ['error', '1tbs'],
+      '@stylistic/no-trailing-spaces': 'error',
     },
   },
 ]
