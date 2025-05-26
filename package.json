@@ -28,12 +28,9 @@
   },
   "description": "[![Actions Status](https://github.com/YodJI27/js-async-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/YodJI27/js-async-project-4/actions)",
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "npx jest",
+    "test-coverage": "npx jest --coverage"
   },
-  "jest": {
-    "testEnvironment": "node",
-    "transform": {}
-  },
-  "author": "",
+  "author": "Ilya Shnyrev",
   "license": "ISC"
 }
