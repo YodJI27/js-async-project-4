@@ -28,16 +28,15 @@ axios.interceptors.response.use((response) => {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const isLocalResource = (resourceUrl, pageUrl) => {
-    try {
-      const pageDomain = new URL(pageUrl).hostname;
-      const resourceDomain = new URL(resourceUrl, pageUrl).hostname;
-      // Учитываем поддомены одного домена
-      return resourceDomain === pageDomain || 
-             resourceDomain.endsWith('.' + pageDomain);
-    } catch {
-      return false;
-    }
-  };
+  try {
+    const pageDomain = new URL(pageUrl).hostname;
+    const resourceDomain = new URL(resourceUrl, pageUrl).hostname;
+    return resourceDomain === pageDomain || 
+           resourceDomain.endsWith('.' + pageDomain);
+  } catch {
+    return false;
+  }
+};
 
 const generateFilename = (url, extension = 'html') => {
   const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
@@ -48,105 +47,127 @@ const generateFilename = (url, extension = 'html') => {
 };
 
 const getExtensionFromUrl = (url) => {
-    try {
-      const urlObj = new URL(url);
-      const pathname = urlObj.pathname;
-      
-      // Если URL заканчивается на /, считаем это HTML
-      if (pathname.endsWith('/')) return 'html';
-      
-      const lastDotIndex = pathname.lastIndexOf('.');
-      const lastSlashIndex = pathname.lastIndexOf('/');
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    
+    if (pathname.endsWith('/')) return 'html';
+    
+    const lastDotIndex = pathname.lastIndexOf('.');
+    const lastSlashIndex = pathname.lastIndexOf('/');
 
-      if (lastDotIndex === -1 || lastDotIndex < lastSlashIndex) {
-        return pathname.endsWith('/courses') ? 'html' : 'bin';
-      }
-      
-      return pathname.slice(lastDotIndex + 1).toLowerCase();
-    } catch {
-      return 'bin';
+    if (lastDotIndex === -1 || lastDotIndex < lastSlashIndex) {
+      return pathname.endsWith('/courses') ? 'html' : 'bin';
     }
-  };
+    
+    return pathname.slice(lastDotIndex + 1).toLowerCase();
+  } catch {
+    return 'bin';
+  }
+};
 
 const processHtml = async (html, pageUrl, outputDir) => {
-    log(`Processing HTML for URL: ${pageUrl}`);
-    const $ = cheerio.load(html);
-    const resourcesDirName = generateFilename(pageUrl).replace('.html', '_files');
-    const resourcesDir = path.join(outputDir, resourcesDirName);
+  log(`Processing HTML for URL: ${pageUrl}`);
+  const $ = cheerio.load(html);
+  const resourcesDirName = generateFilename(pageUrl).replace('.html', '_files');
+  const resourcesDir = path.join(outputDir, resourcesDirName);
+  
+  try {
+    await fs.access(outputDir, fs.constants.W_OK);
     log(`Creating resources directory: ${resourcesDir}`);
     await fs.mkdir(resourcesDir, { recursive: true });
-  
-    const resourceTags = [
-        { selector: 'img', attr: 'src' },
-        { selector: 'link', attr: 'href' },
-        { selector: 'script', attr: 'src' }
-    ];
-  
-    const downloadPromises = resourceTags.flatMap(({ selector, attr, forceHtml = false }) => {
-      return $(selector).map(async (i, el) => {
-        const resourceUrl = $(el).attr(attr);
-        if (!resourceUrl) return;
-  
-        try {
-          const absoluteUrl = new URL(resourceUrl, pageUrl).toString();
-          if (!isLocalResource(absoluteUrl, pageUrl)) {
-            log(`Skipping external resource: ${absoluteUrl}`);
-            return;
-          }
-  
-          const extension = $(el).attr('rel') === 'canonical' 
-            ? 'html' 
-            : getExtensionFromUrl(absoluteUrl);
-          const filename = generateFilename(absoluteUrl, extension);
-          const resourcePath = path.join(resourcesDir, filename);
-  
-          try {
-            log(`Downloading resource: ${absoluteUrl}`);
-            const response = await axios.get(absoluteUrl, { 
-              responseType: 'arraybuffer'
-            });
-            await fs.writeFile(resourcePath, response.data);
-            log(`Resource saved: ${resourcePath}`);
-            console.log(`Downloaded: ${filename}`);
-            $(el).attr(attr, path.join(resourcesDirName, filename));
-          } catch (error) {
-            if (error.response?.status === 404) {
-              log(`Resource not found (404): ${absoluteUrl}`);
-            } else {
-              log(`Error downloading resource ${absoluteUrl}: ${error.message}`);
-            }
-          }
-        } catch (error) {
-          log(`Failed to process resource ${resourceUrl}: ${error.message}`);
+  } catch (error) {
+    throw new Error(`No access to directory ${outputDir}: ${error.message}`);
+  }
+
+  const resourceTags = [
+    { selector: 'img', attr: 'src' },
+    { selector: 'link', attr: 'href' },
+    { selector: 'script', attr: 'src' }
+  ];
+
+  const downloadPromises = resourceTags.flatMap(({ selector, attr, forceHtml = false }) => {
+    return $(selector).map(async (i, el) => {
+      const resourceUrl = $(el).attr(attr);
+      if (!resourceUrl) return;
+
+      try {
+        const absoluteUrl = new URL(resourceUrl, pageUrl).toString();
+        if (!isLocalResource(absoluteUrl, pageUrl)) {
+          log(`Skipping external resource: ${absoluteUrl}`);
+          return;
         }
-      }).get();
-    });
-  
+
+        const extension = $(el).attr('rel') === 'canonical' 
+          ? 'html' 
+          : getExtensionFromUrl(absoluteUrl);
+        const filename = generateFilename(absoluteUrl, extension);
+        const resourcePath = path.join(resourcesDir, filename);
+
+        try {
+          log(`Downloading resource: ${absoluteUrl}`);
+          const response = await axios.get(absoluteUrl, { 
+            responseType: 'arraybuffer',
+            validateStatus: (status) => status === 200
+          });
+          await fs.writeFile(resourcePath, response.data);
+          log(`Resource saved: ${resourcePath}`);
+          console.log(`Downloaded: ${filename}`);
+          $(el).attr(attr, path.join(resourcesDirName, filename));
+        } catch (error) {
+          if (error.response) {
+            throw new Error(`Failed to download ${absoluteUrl}: HTTP ${error.response.status}`);
+          } else {
+            throw new Error(`Failed to download ${absoluteUrl}: ${error.message}`);
+          }
+        }
+      } catch (error) {
+        throw new Error(`Failed to process resource ${resourceUrl}: ${error.message}`);
+      }
+    }).get();
+  });
+
+  try {
     await Promise.all(downloadPromises);
-    return $.html();
-  };
+  } catch (error) {
+    if (error.response) {
+      throw new Error(`Failed to download resource: HTTP ${error.response.status}`);
+    }
+    throw error;
+  }
+  
+  return $.html();
+};
 
 const downloadPage = async (url, outputDir = process.cwd()) => {
   log(`Starting download for URL: ${url} to directory: ${outputDir}`);
   const normalizedOutputDir = path.normalize(outputDir);
   
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, {
+      validateStatus: (status) => status === 200
+    });
+    
     const filename = generateFilename(url);
     const filepath = path.join(normalizedOutputDir, filename);
     
-    log(`Creating output directory: ${normalizedOutputDir}`);
-    await fs.mkdir(normalizedOutputDir, { recursive: true });
-    
+    try {
+    await fs.access(normalizedOutputDir, fs.constants.W_OK);
     const processedHtml = await processHtml(response.data, url, normalizedOutputDir);
     await fs.writeFile(filepath, processedHtml);
-    
-    log(`Page successfully saved to: ${filepath}`);
-    console.log(`\nPage saved to: ${filepath}`);
     return filepath;
   } catch (error) {
-    log(`Failed to download page ${url}: ${error.message}`);
-    throw new Error(`Failed to download page ${url}: ${error.message}`);
+    if (error.code === 'EACCES' || error.code === 'ENOENT') {
+      throw new Error(`Failed to download ${url}: No access to directory`);
+    }
+    throw new Error(`Failed to download ${url}: ${error.message}`);
+  }
+  } catch (error) {
+    if (error.response) {
+      throw new Error(`Failed to download ${url}: HTTP ${error.response.status}`);
+    } else {
+      throw new Error(`Failed to download ${url}: ${error.message}`);
+    }
   }
 };
 

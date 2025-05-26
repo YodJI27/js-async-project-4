@@ -24,3 +24,7 @@
 ### Шаг 4 (DEBUG)
 
 ![Demo](page-loader-4.gif)
+
+### Шаг 4 (Обработка ошибок)
+
+![Demo](page-loader-5.gif)

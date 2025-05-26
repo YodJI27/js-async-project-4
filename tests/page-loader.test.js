@@ -43,7 +43,7 @@ describe('page-loader', () => {
     log('Creating temp directory');
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
     
-     log('Setting up nock mocks');
+    log('Setting up nock mocks');
     nock(baseUrl)
       .get('/courses')
       .reply(200, pageContent)
@@ -58,7 +58,7 @@ describe('page-loader', () => {
   });
 
   afterEach(() => {
-     log('Cleaning nock mocks');
+    log('Cleaning nock mocks');
     nock.cleanAll();
   });
 
@@ -83,11 +83,8 @@ describe('page-loader', () => {
   test('should update HTML with local paths', async () => {
     await downloadPage(url, tempDir);
     const html = await fs.readFile(path.join(tempDir, expectedFilename), 'utf-8');
-    
-    // Нормализуем пути для сравнения
     const normalizedHtml = html.replace(/\\/g, '/');
     
-    // Проверяем замену локальных ресурсов
     const expectedPaths = [
       `${expectedResourcesDir}/ru-hexlet-io-assets-application.css`,
       `${expectedResourcesDir}/ru-hexlet-io-assets-professions-nodejs.png`,
@@ -99,7 +96,6 @@ describe('page-loader', () => {
       expect(normalizedHtml).toContain(path);
     });
     
-    // Проверяем, что внешние ресурсы остались без изменений
     expect(html).toContain('https://cdn2.hexlet.io/assets/menu.css');
     expect(html).toContain('https://js.stripe.com/v3/');
   });
@@ -108,19 +104,49 @@ describe('page-loader', () => {
     await downloadPage(url, tempDir);
     const files = await fs.readdir(path.join(tempDir, expectedResourcesDir));
     
-    // Проверяем, что внешние ресурсы не скачались
     expect(files).not.toContain('cdn2-hexlet-io-assets-menu.css');
     expect(files).not.toContain('js-stripe-com-v3.js');
   });
 
-  test('should handle resource download errors', async () => {
+test('should handle resource download errors', async () => {
+  nock.cleanAll();
+  nock(baseUrl)
+    .get('/courses')
+    .reply(200, pageContent)
+    .get('/assets/application.css')
+    .reply(404);
+
+  await expect(downloadPage(url, tempDir)).rejects.toThrow(/Failed to download/);
+});
+
+  test('should handle network errors', async () => {
     nock.cleanAll();
     nock(baseUrl)
       .get('/courses')
-      .reply(200, pageContent)
-      .get('/assets/application.css')
-      .reply(404);
+      .replyWithError('Network error');
 
-    await expect(downloadPage(url, tempDir)).resolves.toBeDefined();
+    await expect(downloadPage(url, tempDir)).rejects.toThrow(/Network error/);
+  });
+
+  test('should handle non-200 status codes', async () => {
+    nock.cleanAll();
+    nock(baseUrl)
+      .get('/courses')
+      .reply(500);
+
+    await expect(downloadPage(url, tempDir)).rejects.toThrow(/HTTP 500/);
+  });
+
+  test('should handle file system errors', async () => {
+    // Создаем директорию без прав на запись
+    const readOnlyDir = path.join(tempDir, 'readonly');
+    await fs.mkdir(readOnlyDir, { recursive: true });
+    
+    // На Windows простое изменение прав может не сработать, поэтому попробуем записать в несуществующую поддиректорию
+    await expect(downloadPage(url, path.join(readOnlyDir, 'nonexistent'))).rejects.toThrow(/Failed to download/);
+  });
+
+  test('should handle invalid URLs', async () => {
+    await expect(downloadPage('invalid-url', tempDir)).rejects.toThrow(/Failed to download/);
   });
 });
