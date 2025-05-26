@@ -129,10 +129,8 @@ const processHtml = async (html, pageUrl, outputDir) => {
         await fs.writeFile(resource.path, response.data);
         resource.element.attr(resource.attr, path.join(resource.resourcesDirName, resource.filename));
       } catch (error) {
-        if (error.response) {
-          throw new Error(`HTTP ${error.response.status}`);
-        }
-        throw new Error(error.message);
+        log(`Failed to download resource ${resource.url}: ${error.message}`);
+        resource.element.removeAttr(resource.attr);
       }
     }
   })), { concurrent: true, exitOnError: false });
@@ -165,13 +163,13 @@ const downloadPage = async (url, outputDir = process.cwd()) => {
     return filepath;
   } catch (error) {
     if (error.response) {
-      throw new Error(`HTTP Error ${error.response.status}`);
+      throw new Error(`HTTP Error ${error.response.status} for ${url}`);
     } else if (error.code === 'ENOENT') {
       throw new Error(`Directory does not exist: ${error.path}`);
     } else if (error.code === 'EACCES') {
-      throw new Error(`Permission denied`);
+      throw new Error(`Permission denied for directory ${outputDir}`);
     }
-    throw new Error(`Download failed: ${error.message}`);
+    throw new Error(`Failed to download ${url}: ${error.message}`);
   }
 };
 
