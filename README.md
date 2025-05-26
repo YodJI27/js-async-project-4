@@ -3,8 +3,6 @@
 
 [![Actions Status](https://github.com/YodJI27/js-async-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/YodJI27/js-async-project-4/actions)
 [![ESLint](https://img.shields.io/badge/ESLint-passing-brightgreen)](https://eslint.org/)
-[![Maintainability](https://api.codeclimate.com/v1/badges/MAINTAINABILITY_BADGE_ID/maintainability)](https://codeclimate.com/github/YodJI27/js-async-project-4/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/TEST_COVERAGE_BADGE_ID/coverage)](https://codeclimate.com/github/YodJI27/js-async-project-4/test_coverage)
 
 
 
