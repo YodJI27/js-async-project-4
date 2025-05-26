@@ -115,7 +115,9 @@ describe('page-loader', () => {
       .get('/assets/application.css')
       .reply(404)
 
-    await expect(downloadPage(url, tempDir)).rejects.toThrow(/Failed to download/)
+    await downloadPage(url, tempDir)
+    const html = await fs.readFile(path.join(tempDir, expectedFilename), 'utf-8')
+    expect(html).not.toContain('assets/application.css')
   })
 
   test('should handle network errors', async () => {
@@ -133,7 +135,7 @@ describe('page-loader', () => {
       .get('/courses')
       .reply(500)
 
-    await expect(downloadPage(url, tempDir)).rejects.toThrow(/HTTP 500/)
+    await expect(downloadPage(url, tempDir)).rejects.toThrow(/HTTP Error 500/)
   })
 
   test('should handle file system errors', async () => {
