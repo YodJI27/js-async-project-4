@@ -143,34 +143,35 @@ const processHtml = async (html, pageUrl, outputDir) => {
 };
 
 const downloadPage = async (url, outputDir = process.cwd()) => {
-  log(`Starting download for URL: ${url} to directory: ${outputDir}`);
-  const normalizedOutputDir = path.normalize(outputDir);
-  
   try {
-    // Проверяем доступ к директории перед запросом
+    // Проверка доступности директории
     try {
-      await fs.access(normalizedOutputDir, fs.constants.W_OK);
-    } catch (error) {
-      throw new Error(`No write access to directory ${normalizedOutputDir}`);
+      await fs.access(outputDir, fs.constants.W_OK);
+    } catch (err) {
+      throw new Error(`No write access to directory: ${outputDir}`);
     }
 
     const response = await axios.get(url, {
+      responseType: 'text',
       validateStatus: (status) => status === 200
     });
-    
+
     const filename = generateFilename(url);
-    const filepath = path.join(normalizedOutputDir, filename);
+    const filepath = path.join(outputDir, filename);
     
-    const processedHtml = await processHtml(response.data, url, normalizedOutputDir);
+    const processedHtml = await processHtml(response.data, url, outputDir);
     await fs.writeFile(filepath, processedHtml);
-    return filepath;
     
+    return filepath;
   } catch (error) {
     if (error.response) {
-      throw new Error(`Failed to download ${url}: HTTP ${error.response.status}`);
+      throw new Error(`HTTP Error ${error.response.status}`);
+    } else if (error.code === 'ENOENT') {
+      throw new Error(`Directory does not exist: ${error.path}`);
+    } else if (error.code === 'EACCES') {
+      throw new Error(`Permission denied`);
     }
-    // Улучшаем сообщение об ошибке
-    throw new Error(`Failed to download ${url}: ${error.message}`);
+    throw new Error(`Download failed: ${error.message}`);
   }
 };
 
