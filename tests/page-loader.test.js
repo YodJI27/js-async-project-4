@@ -107,16 +107,16 @@ describe('page-loader', () => {
     expect(files).not.toContain('js-stripe-com-v3.js');
   });
 
-test('should handle resource download errors', async () => {
-  nock.cleanAll();
-  nock(baseUrl)
-    .get('/courses')
-    .reply(200, pageContent)
-    .get('/assets/application.css')
-    .reply(404);
+  test('should handle resource download errors', async () => {
+    nock.cleanAll();
+    nock(baseUrl)
+      .get('/courses')
+      .reply(200, pageContent)
+      .get('/assets/application.css')
+      .reply(404);
 
-  await expect(downloadPage(url, tempDir)).rejects.toThrow(/Failed to download/);
-});
+    await expect(downloadPage(url, tempDir)).rejects.toThrow(/Failed to download/);
+  });
 
   test('should handle network errors', async () => {
     nock.cleanAll();
