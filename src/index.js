@@ -147,6 +147,13 @@ const downloadPage = async (url, outputDir = process.cwd()) => {
   const normalizedOutputDir = path.normalize(outputDir);
   
   try {
+    // Проверяем доступ к директории перед запросом
+    try {
+      await fs.access(normalizedOutputDir, fs.constants.W_OK);
+    } catch (error) {
+      throw new Error(`No write access to directory ${normalizedOutputDir}`);
+    }
+
     const response = await axios.get(url, {
       validateStatus: (status) => status === 200
     });
@@ -154,21 +161,15 @@ const downloadPage = async (url, outputDir = process.cwd()) => {
     const filename = generateFilename(url);
     const filepath = path.join(normalizedOutputDir, filename);
     
-    try {
-      await fs.access(normalizedOutputDir, fs.constants.W_OK);
-      const processedHtml = await processHtml(response.data, url, normalizedOutputDir);
-      await fs.writeFile(filepath, processedHtml);
-      return filepath;
-    } catch (error) {
-      if (error.code === 'EACCES' || error.code === 'ENOENT') {
-        throw new Error(`No access to directory ${normalizedOutputDir}`);
-      }
-      throw new Error(`File system error: ${error.message}`);
-    }
+    const processedHtml = await processHtml(response.data, url, normalizedOutputDir);
+    await fs.writeFile(filepath, processedHtml);
+    return filepath;
+    
   } catch (error) {
     if (error.response) {
       throw new Error(`Failed to download ${url}: HTTP ${error.response.status}`);
     }
+    // Улучшаем сообщение об ошибке
     throw new Error(`Failed to download ${url}: ${error.message}`);
   }
 };
