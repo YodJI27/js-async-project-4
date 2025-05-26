@@ -6,25 +6,28 @@
 [![License](https://img.shields.io/github/license/YodJI27/js-async-project-4)](https://github.com/YodJI27/js-async-project-4/blob/main/LICENSE)
 
 
-
 ## Пошаговый пример работы программы
 
-### Шаг 1
+## Шаг 1 (Скачивание html файла)
 
 ![Demo](page-loader.gif)
 
-### Шаг 2
+## Шаг 2 (Скачивание img)
 
 ![Demo](page-loader-2.gif)
 
-### Шаг 3
+## Шаг 3 (Скачивание link & script)
 
 ![Demo](page-loader-3.gif)
 
-### Шаг 4 (DEBUG)
+## Шаг 4 (DEBUG)
 
 ![Demo](page-loader-4.gif)
 
-### Шаг 5 (Обработка ошибок)
+## Шаг 5 (Обработка ошибок)
+
+![Demo](page-loader-5.gif)
+
+## Шаг 6 (Отображения прогресса с помощью библиотеки listr)
 
 ![Demo](page-loader-5.gif)

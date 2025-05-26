@@ -1,15 +1,14 @@
-// src/page-loader.js
 import axios from 'axios';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import * as cheerio from 'cheerio';
 import debug from 'debug';
+import Listr from 'listr';
 
 // Настройка логирования
 const log = debug('page-loader');
 const axiosLog = debug('axios');
-const nockLog = debug('nock');
 
 // Включение логирования для axios
 axios.interceptors.request.use((config) => {
@@ -86,16 +85,16 @@ const processHtml = async (html, pageUrl, outputDir) => {
     { selector: 'script', attr: 'src' }
   ];
 
-  const downloadPromises = resourceTags.flatMap(({ selector, attr, forceHtml = false }) => {
-    return $(selector).map(async (i, el) => {
+  const resources = resourceTags.flatMap(({ selector, attr }) => {
+    return $(selector).map((i, el) => {
       const resourceUrl = $(el).attr(attr);
-      if (!resourceUrl) return;
+      if (!resourceUrl) return null;
 
       try {
         const absoluteUrl = new URL(resourceUrl, pageUrl).toString();
         if (!isLocalResource(absoluteUrl, pageUrl)) {
           log(`Skipping external resource: ${absoluteUrl}`);
-          return;
+          return null;
         }
 
         const extension = $(el).attr('rel') === 'canonical' 
@@ -104,37 +103,41 @@ const processHtml = async (html, pageUrl, outputDir) => {
         const filename = generateFilename(absoluteUrl, extension);
         const resourcePath = path.join(resourcesDir, filename);
 
-        try {
-          log(`Downloading resource: ${absoluteUrl}`);
-          const response = await axios.get(absoluteUrl, { 
-            responseType: 'arraybuffer',
-            validateStatus: (status) => status === 200
-          });
-          await fs.writeFile(resourcePath, response.data);
-          log(`Resource saved: ${resourcePath}`);
-          console.log(`Downloaded: ${filename}`);
-          $(el).attr(attr, path.join(resourcesDirName, filename));
-        } catch (error) {
-          if (error.response) {
-            throw new Error(`Failed to download ${absoluteUrl}: HTTP ${error.response.status}`);
-          } else {
-            throw new Error(`Failed to download ${absoluteUrl}: ${error.message}`);
-          }
-        }
+        return {
+          url: absoluteUrl,
+          path: resourcePath,
+          filename,
+          element: $(el),
+          attr,
+          resourcesDirName
+        };
       } catch (error) {
-        throw new Error(`Failed to process resource ${resourceUrl}: ${error.message}`);
+        log(`Failed to process resource ${resourceUrl}: ${error.message}`);
+        return null;
       }
-    }).get();
+    }).get().filter(Boolean);
   });
 
-  try {
-    await Promise.all(downloadPromises);
-  } catch (error) {
-    if (error.response) {
-      throw new Error(`Failed to download resource: HTTP ${error.response.status}`);
+  const tasks = new Listr(resources.map(resource => ({
+    title: `Downloading ${resource.url}`,
+    task: async () => {
+      try {
+        const response = await axios.get(resource.url, {
+          responseType: 'arraybuffer',
+          validateStatus: (status) => status === 200
+        });
+        await fs.writeFile(resource.path, response.data);
+        resource.element.attr(resource.attr, path.join(resource.resourcesDirName, resource.filename));
+      } catch (error) {
+        if (error.response) {
+          throw new Error(`HTTP ${error.response.status}`);
+        }
+        throw new Error(error.message);
+      }
     }
-    throw error;
-  }
+  })), { concurrent: true, exitOnError: false });
+
+  await tasks.run();
   
   return $.html();
 };
@@ -152,22 +155,21 @@ const downloadPage = async (url, outputDir = process.cwd()) => {
     const filepath = path.join(normalizedOutputDir, filename);
     
     try {
-    await fs.access(normalizedOutputDir, fs.constants.W_OK);
-    const processedHtml = await processHtml(response.data, url, normalizedOutputDir);
-    await fs.writeFile(filepath, processedHtml);
-    return filepath;
-  } catch (error) {
-    if (error.code === 'EACCES' || error.code === 'ENOENT') {
-      throw new Error(`Failed to download ${url}: No access to directory`);
+      await fs.access(normalizedOutputDir, fs.constants.W_OK);
+      const processedHtml = await processHtml(response.data, url, normalizedOutputDir);
+      await fs.writeFile(filepath, processedHtml);
+      return filepath;
+    } catch (error) {
+      if (error.code === 'EACCES' || error.code === 'ENOENT') {
+        throw new Error(`No access to directory ${normalizedOutputDir}`);
+      }
+      throw new Error(`File system error: ${error.message}`);
     }
-    throw new Error(`Failed to download ${url}: ${error.message}`);
-  }
   } catch (error) {
     if (error.response) {
       throw new Error(`Failed to download ${url}: HTTP ${error.response.status}`);
-    } else {
-      throw new Error(`Failed to download ${url}: ${error.message}`);
     }
+    throw new Error(`Failed to download ${url}: ${error.message}`);
   }
 };
 
