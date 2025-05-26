@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import * as cheerio from 'cheerio';
 import debug from 'debug';
 import Listr from 'listr';
@@ -23,8 +22,6 @@ axios.interceptors.response.use((response) => {
   axiosLog('Error:', error.message, error.config?.url);
   return Promise.reject(error);
 });
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const isLocalResource = (resourceUrl, pageUrl) => {
   try {

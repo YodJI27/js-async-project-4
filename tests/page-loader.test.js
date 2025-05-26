@@ -1,6 +1,5 @@
 // page-loader.test.js
 import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
-import axios from 'axios';
 import nock from 'nock';
 import { promises as fs } from 'fs';
 import os from 'os';
