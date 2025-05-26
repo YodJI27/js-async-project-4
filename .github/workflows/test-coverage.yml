@@ -1,26 +1,31 @@
-name: Test Coverage
-on: [push, pull_request]
+name: Code Coverage
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
-  test:
+  coverage:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node (для JS) / Ruby (для Ruby)
-        uses: actions/setup-node@v4  # или `ruby/setup-ruby` для Ruby
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22.12.0'
+
       - name: Install dependencies
-        run: npm install  # или `bundle install` для Ruby
+        run: npm install
+
       - name: Run tests with coverage
-        run: npm run coverage  # или `bundle exec rspec` для Ruby
+        run: npm run test-coverage
+
       - name: Upload coverage to Code Climate
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.QLTY_COVERAGE_TOKEN }}
-        run: |
-          # Для JavaScript (используйте `cc-test-reporter`)
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
-          npm test  # или команда для тестов
-          ./cc-test-reporter after-build --exit-code $?
+        uses: qltysh/qlty-action/coverage@v1
+        with:
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: coverage/lcov.info
