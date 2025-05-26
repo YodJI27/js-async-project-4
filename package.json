@@ -28,8 +28,8 @@
   },
   "description": "[![Actions Status](https://github.com/YodJI27/js-async-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/YodJI27/js-async-project-4/actions)",
   "scripts": {
-    "test": "npx jest",
-    "test-coverage": "npx jest --coverage"
+    "test": "jest",
+    "test-coverage": "jest --coverage"
   },
   "author": "Ilya Shnyrev",
   "license": "ISC"
