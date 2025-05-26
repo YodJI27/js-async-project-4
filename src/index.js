@@ -29,7 +29,8 @@ const isLocalResource = (resourceUrl, pageUrl) => {
     const resourceDomain = new URL(resourceUrl, pageUrl).hostname
     return resourceDomain === pageDomain
       || resourceDomain.endsWith('.' + pageDomain)
-  } catch {
+  }
+  catch {
     return false
   }
 }
@@ -57,7 +58,8 @@ const getExtensionFromUrl = (url) => {
     }
 
     return pathname.slice(lastDotIndex + 1).toLowerCase()
-  } catch {
+  }
+  catch {
     return 'bin'
   }
 }
@@ -72,7 +74,8 @@ const processHtml = async (html, pageUrl, outputDir) => {
     await fs.access(outputDir, fs.constants.W_OK)
     log(`Creating resources directory: ${resourcesDir}`)
     await fs.mkdir(resourcesDir, { recursive: true })
-  } catch (error) {
+  }
+  catch (error) {
     throw new Error(`No access to directory ${outputDir}: ${error.message}`)
   }
 
@@ -108,7 +111,8 @@ const processHtml = async (html, pageUrl, outputDir) => {
           attr,
           resourcesDirName,
         }
-      } catch (error) {
+      }
+      catch (error) {
         log(`Failed to process resource ${resourceUrl}: ${error.message}`)
         return null
       }
@@ -125,7 +129,8 @@ const processHtml = async (html, pageUrl, outputDir) => {
         })
         await fs.writeFile(resource.path, response.data)
         resource.element.attr(resource.attr, path.join(resource.resourcesDirName, resource.filename))
-      } catch (error) {
+      }
+      catch (error) {
         log(`Failed to download resource ${resource.url}: ${error.message}`)
         resource.element.removeAttr(resource.attr)
       }
@@ -142,7 +147,8 @@ const downloadPage = async (url, outputDir = process.cwd()) => {
     // Проверка доступности директории
     try {
       await fs.access(outputDir, fs.constants.W_OK)
-    } catch {
+    }
+    catch {
       throw new Error(`No write access to directory: ${outputDir}`)
     }
 
@@ -158,12 +164,15 @@ const downloadPage = async (url, outputDir = process.cwd()) => {
     await fs.writeFile(filepath, processedHtml)
 
     return filepath
-  } catch (error) {
+  }
+  catch (error) {
     if (error.response) {
       throw new Error(`HTTP Error ${error.response.status} for ${url}`)
-    } else if (error.code === 'ENOENT') {
+    }
+    else if (error.code === 'ENOENT') {
       throw new Error(`Directory does not exist: ${error.path}`)
-    } else if (error.code === 'EACCES') {
+    }
+    else if (error.code === 'EACCES') {
       throw new Error(`Permission denied for directory ${outputDir}`)
     }
     throw new Error(`Failed to download ${url}: ${error.message}`)

@@ -16,7 +16,7 @@ program
       const options = program.opts()
       const filepath = await downloadPage(url, options.output)
       console.log(`Page successfully downloaded to: ${filepath}`)
-    } 
+    }
     catch (error) {
       console.error(`Error: ${error.message}`)
       process.exit(1)
