@@ -30,4 +30,4 @@
 
 ## Шаг 6 (Отображения прогресса с помощью библиотеки listr)
 
-![Demo](page-loader-5.gif)
+![Demo](page-loader-6.gif)
