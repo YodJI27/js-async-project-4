@@ -7,6 +7,43 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=YodJI27_js-async-project-4&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=YodJI27_js-async-project-4)
 
 
+## Установка и запуск
+
+1. Склонируйте репозиторий:
+```bash
+git clone git@github.com:YodJI27/js-async-project-4.git
+
+and
+
+cd js-async-project-4
+```
+
+2. Установите зависимости
+```bash
+npm install
+```
+
+3. Запуск
+```bash
+Usage: page-loader [options] <url>
+
+Page loader utility
+
+Arguments:
+  url                 url to download
+
+Options:
+  -V, --version       output the version number
+  -o, --output [dir]  output dir (default:
+                      "C:\\Users\\Leo27\\Desktop\\project\\js-async-project-4")
+  -h, --help          display help for command
+```
+
+4. Тесты
+```bash
+npm test || npm run test-coverage
+```
+
 
 ## Пошаговый пример работы программы
 

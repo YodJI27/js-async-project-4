@@ -26,7 +26,7 @@
   "bin": {
     "page-loader": "src/cli.js"
   },
-  "description": "[![Actions Status](https://github.com/YodJI27/js-async-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/YodJI27/js-async-project-4/actions)",
+  "description": "page-loader is a CLI tool for downloading complete web pages locally",
   "scripts": {
     "test": "npx jest",
     "test-coverage": "npx jest --coverage"
