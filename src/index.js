@@ -180,4 +180,4 @@ const downloadPage = (url, outputDir = process.cwd()) => {
     })
 }
 
-export default downloadPage;
+export default downloadPage
