@@ -24,7 +24,7 @@
   "main": "src/index.js",
   "type": "module",
   "bin": {
-    "page-loader": "src/cli.js"
+    "page-loader": "bin/cli.js"
   },
   "description": "page-loader is a CLI tool for downloading complete web pages locally",
   "scripts": {

@@ -29,8 +29,7 @@ const isLocalResource = (resourceUrl, pageUrl) => {
     const resourceDomain = new URL(resourceUrl, pageUrl).hostname
     return resourceDomain === pageDomain
       || resourceDomain.endsWith('.' + pageDomain)
-  }
-  catch {
+  } catch {
     return false
   }
 }
@@ -58,125 +57,122 @@ const getExtensionFromUrl = (url) => {
     }
 
     return pathname.slice(lastDotIndex + 1).toLowerCase()
-  }
-  catch {
+  } catch {
     return 'bin'
   }
 }
 
-const processHtml = async (html, pageUrl, outputDir) => {
+const processHtml = (html, pageUrl, outputDir) => {
   log(`Processing HTML for URL: ${pageUrl}`)
   const $ = cheerio.load(html)
   const resourcesDirName = generateFilename(pageUrl).replace('.html', '_files')
   const resourcesDir = path.join(outputDir, resourcesDirName)
 
-  try {
-    await fs.access(outputDir, fs.constants.W_OK)
-    log(`Creating resources directory: ${resourcesDir}`)
-    await fs.mkdir(resourcesDir, { recursive: true })
-  }
-  catch (error) {
-    throw new Error(`No access to directory ${outputDir}: ${error.message}`)
-  }
+  return fs.access(outputDir, fs.constants.W_OK)
+    .then(() => {
+      log(`Creating resources directory: ${resourcesDir}`)
+      return fs.mkdir(resourcesDir, { recursive: true })
+    })
+    .catch(error => {
+      throw new Error(`No access to directory ${outputDir}: ${error.message}`)
+    })
+    .then(() => {
+      const resourceTags = [
+        { selector: 'img', attr: 'src' },
+        { selector: 'link', attr: 'href' },
+        { selector: 'script', attr: 'src' },
+      ]
 
-  const resourceTags = [
-    { selector: 'img', attr: 'src' },
-    { selector: 'link', attr: 'href' },
-    { selector: 'script', attr: 'src' },
-  ]
+      const resources = resourceTags.flatMap(({ selector, attr }) => {
+        return $(selector).map((i, el) => {
+          const resourceUrl = $(el).attr(attr)
+          if (!resourceUrl) return null
 
-  const resources = resourceTags.flatMap(({ selector, attr }) => {
-    return $(selector).map((i, el) => {
-      const resourceUrl = $(el).attr(attr)
-      if (!resourceUrl) return null
+          try {
+            const absoluteUrl = new URL(resourceUrl, pageUrl).toString()
+            if (!isLocalResource(absoluteUrl, pageUrl)) {
+              log(`Skipping external resource: ${absoluteUrl}`)
+              return null
+            }
 
-      try {
-        const absoluteUrl = new URL(resourceUrl, pageUrl).toString()
-        if (!isLocalResource(absoluteUrl, pageUrl)) {
-          log(`Skipping external resource: ${absoluteUrl}`)
-          return null
-        }
+            const extension = $(el).attr('rel') === 'canonical'
+              ? 'html'
+              : getExtensionFromUrl(absoluteUrl)
+            const filename = generateFilename(absoluteUrl, extension)
+            const resourcePath = path.join(resourcesDir, filename)
 
-        const extension = $(el).attr('rel') === 'canonical'
-          ? 'html'
-          : getExtensionFromUrl(absoluteUrl)
-        const filename = generateFilename(absoluteUrl, extension)
-        const resourcePath = path.join(resourcesDir, filename)
+            return {
+              url: absoluteUrl,
+              path: resourcePath,
+              filename,
+              element: $(el),
+              attr,
+              resourcesDirName,
+            }
+          } catch (error) {
+            log(`Failed to process resource ${resourceUrl}: ${error.message}`)
+            return null
+          }
+        }).get().filter(Boolean)
+      })
 
-        return {
-          url: absoluteUrl,
-          path: resourcePath,
-          filename,
-          element: $(el),
-          attr,
-          resourcesDirName,
-        }
-      }
-      catch (error) {
-        log(`Failed to process resource ${resourceUrl}: ${error.message}`)
-        return null
-      }
-    }).get().filter(Boolean)
-  })
+      const tasks = new Listr(resources.map(resource => ({
+        title: `Downloading ${resource.url}`,
+        task: () => {
+          return axios.get(resource.url, {
+            responseType: 'arraybuffer',
+            validateStatus: status => status === 200,
+          })
+            .then(response => {
+              return fs.writeFile(resource.path, response.data)
+                .then(() => {
+                  resource.element.attr(resource.attr, path.join(resource.resourcesDirName, resource.filename))
+                })
+            })
+            .catch(error => {
+              log(`Failed to download resource ${resource.url}: ${error.message}`)
+              resource.element.removeAttr(resource.attr)
+            })
+        },
+      })), { concurrent: true, exitOnError: false })
 
-  const tasks = new Listr(resources.map(resource => ({
-    title: `Downloading ${resource.url}`,
-    task: async () => {
-      try {
-        const response = await axios.get(resource.url, {
-          responseType: 'arraybuffer',
-          validateStatus: status => status === 200,
-        })
-        await fs.writeFile(resource.path, response.data)
-        resource.element.attr(resource.attr, path.join(resource.resourcesDirName, resource.filename))
-      }
-      catch (error) {
-        log(`Failed to download resource ${resource.url}: ${error.message}`)
-        resource.element.removeAttr(resource.attr)
-      }
-    },
-  })), { concurrent: true, exitOnError: false })
-
-  await tasks.run()
-
-  return $.html()
+      return tasks.run()
+        .then(() => $.html())
+    })
 }
 
-const downloadPage = async (url, outputDir = process.cwd()) => {
-  try {
-    // Проверка доступности директории
-    try {
-      await fs.access(outputDir, fs.constants.W_OK)
-    }
-    catch {
+const downloadPage = (url, outputDir = process.cwd()) => {
+  // Проверка доступности директории
+  return fs.access(outputDir, fs.constants.W_OK)
+    .catch(() => {
       throw new Error(`No write access to directory: ${outputDir}`)
-    }
-
-    const response = await axios.get(url, {
-      responseType: 'text',
-      validateStatus: status => status === 200,
     })
+    .then(() => {
+      return axios.get(url, {
+        responseType: 'text',
+        validateStatus: status => status === 200,
+      })
+    })
+    .then(response => {
+      const filename = generateFilename(url)
+      const filepath = path.join(outputDir, filename)
 
-    const filename = generateFilename(url)
-    const filepath = path.join(outputDir, filename)
-
-    const processedHtml = await processHtml(response.data, url, outputDir)
-    await fs.writeFile(filepath, processedHtml)
-
-    return filepath
-  }
-  catch (error) {
-    if (error.response) {
-      throw new Error(`HTTP Error ${error.response.status} for ${url}`)
-    }
-    else if (error.code === 'ENOENT') {
-      throw new Error(`Directory does not exist: ${error.path}`)
-    }
-    else if (error.code === 'EACCES') {
-      throw new Error(`Permission denied for directory ${outputDir}`)
-    }
-    throw new Error(`Failed to download ${url}: ${error.message}`)
-  }
+      return processHtml(response.data, url, outputDir)
+        .then(processedHtml => {
+          return fs.writeFile(filepath, processedHtml)
+            .then(() => filepath)
+        })
+    })
+    .catch(error => {
+      if (error.response) {
+        throw new Error(`HTTP Error ${error.response.status} for ${url}`)
+      } else if (error.code === 'ENOENT') {
+        throw new Error(`Directory does not exist: ${error.path}`)
+      } else if (error.code === 'EACCES') {
+        throw new Error(`Permission denied for directory ${outputDir}`)
+      }
+      throw new Error(`Failed to download ${url}: ${error.message}`)
+    })
 }
 
 export default downloadPage
