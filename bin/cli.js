@@ -14,13 +14,13 @@ program
   .action((url) => {
     const options = program.opts()
     downloadPage(url, options.output)
-      .then(filepath => {
+      .then((filepath) => {
         console.log(`Page successfully downloaded to: ${filepath}`)
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(`Error: ${error.message}`)
         process.exit(1)
       })
   })
 
-program.parse(process.argv)
+program.parse(process.argv);

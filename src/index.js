@@ -29,7 +29,8 @@ const isLocalResource = (resourceUrl, pageUrl) => {
     const resourceDomain = new URL(resourceUrl, pageUrl).hostname
     return resourceDomain === pageDomain
       || resourceDomain.endsWith('.' + pageDomain)
-  } catch {
+  }
+  catch {
     return false
   }
 }
@@ -57,7 +58,8 @@ const getExtensionFromUrl = (url) => {
     }
 
     return pathname.slice(lastDotIndex + 1).toLowerCase()
-  } catch {
+  }
+  catch {
     return 'bin'
   }
 }
@@ -73,7 +75,7 @@ const processHtml = (html, pageUrl, outputDir) => {
       log(`Creating resources directory: ${resourcesDir}`)
       return fs.mkdir(resourcesDir, { recursive: true })
     })
-    .catch(error => {
+    .catch((error) => {
       throw new Error(`No access to directory ${outputDir}: ${error.message}`)
     })
     .then(() => {
@@ -109,7 +111,8 @@ const processHtml = (html, pageUrl, outputDir) => {
               attr,
               resourcesDirName,
             }
-          } catch (error) {
+          }
+          catch (error) {
             log(`Failed to process resource ${resourceUrl}: ${error.message}`)
             return null
           }
@@ -123,13 +126,13 @@ const processHtml = (html, pageUrl, outputDir) => {
             responseType: 'arraybuffer',
             validateStatus: status => status === 200,
           })
-            .then(response => {
+            .then((response) => {
               return fs.writeFile(resource.path, response.data)
                 .then(() => {
                   resource.element.attr(resource.attr, path.join(resource.resourcesDirName, resource.filename))
                 })
             })
-            .catch(error => {
+            .catch((error) => {
               log(`Failed to download resource ${resource.url}: ${error.message}`)
               resource.element.removeAttr(resource.attr)
             })
@@ -153,26 +156,28 @@ const downloadPage = (url, outputDir = process.cwd()) => {
         validateStatus: status => status === 200,
       })
     })
-    .then(response => {
+    .then((response) => {
       const filename = generateFilename(url)
       const filepath = path.join(outputDir, filename)
 
       return processHtml(response.data, url, outputDir)
-        .then(processedHtml => {
+        .then((processedHtml) => {
           return fs.writeFile(filepath, processedHtml)
             .then(() => filepath)
         })
     })
-    .catch(error => {
+    .catch((error) => {
       if (error.response) {
         throw new Error(`HTTP Error ${error.response.status} for ${url}`)
-      } else if (error.code === 'ENOENT') {
+      }
+      else if (error.code === 'ENOENT') {
         throw new Error(`Directory does not exist: ${error.path}`)
-      } else if (error.code === 'EACCES') {
+      }
+      else if (error.code === 'EACCES') {
         throw new Error(`Permission denied for directory ${outputDir}`)
       }
       throw new Error(`Failed to download ${url}: ${error.message}`)
     })
 }
 
-export default downloadPage
+export default downloadPage;
