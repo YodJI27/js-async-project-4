@@ -144,7 +144,8 @@ describe('page-loader', () => {
     await fs.mkdir(readOnlyDir, { recursive: true })
 
     // На Windows простое изменение прав может не сработать, поэтому попробуем записать в несуществующую поддиректорию
-    await expect(downloadPage(url, path.join(readOnlyDir, 'nonexistent'))).rejects.toThrow(/Failed to download/)
+    await expect(downloadPage(url, path.join(readOnlyDir, 'nonexistent')))
+      .rejects.toThrow(/Directory does not exist/)
   })
 
   test('should handle invalid URLs', async () => {
