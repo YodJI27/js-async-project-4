@@ -1,0 +1,237 @@
+import{r as c,j as o}from"./index-f3ZQ7e7G.js";import{c as y,u as S}from"./ThemeProvider-BCC4u8C0.js";import{M as ce}from"./MarkdownViewer-Cvh176vI.js";import{i as ae}from"./i18next-Bhc83OLH.js";import{u as D}from"./useTranslation-BmCPOfjo.js";import{P as k}from"./index-BfM5NbKg.js";import{C as le}from"./Col-B3Ka-nPO.js";import{B as de}from"./Button-Bo8U-sNj.js";import{u as ue,E as he,F as me}from"./errorboundary-CFoh3JlK.js";import{a as pe}from"./routes-CXA-Fm45.js";import{a as q}from"./index-xsH4HHeE.js";import{d as fe}from"./debounce-CLTjDgnO.js";import{R as ge}from"./client-B6hYdmWc.js";import{O as $}from"./Offcanvas-CUoC7ILe.js";import"./_commonjsHelpers-D6-XlEtG.js";import"./index-CFw3EYG8.js";import"./index-CFCdE9-Z.js";import"./i18nInstance-DBIXdvxg.js";import"./Button-CaTNTFyi.js";import"./index-OAUcaBCa.js";import"./AbstractModalHeader-CUb4IJgE.js";import"./useEventCallback-B1KjAgOW.js";import"./Transition-3MOmxWZM.js";import"./divWithClassName-DfDkDzue.js";function be(t,e){
+return c.Children.toArray(t).some(s=>c.isValidElement(s)&&s.type===e)
+}const ye={type:k.string,tooltip:k.bool,as:k.elementType},E=c.forwardRef(({as:t="div",className:e,type:s="valid",tooltip:n=!1,...i},r)=>o.jsx(t,{...i,ref:r,className:y(e,`${s}-${n?"tooltip":"feedback"}`)}));E.displayName="Feedback";E.propTypes=ye;const j=c.createContext({}),L=c.forwardRef(({id:t,bsPrefix:e,className:s,type:n="checkbox",isValid:i=!1,isInvalid:r=!1,as:a="input",...u},h)=>{
+const{controlId:d}=c.useContext(j);return e=S(e,"form-check-input"),o.jsx(a,{...u,ref:h,type:n,id:t||d,className:y(s,e,i&&"is-valid",r&&"is-invalid")})
+});L.displayName="FormCheckInput";const M=c.forwardRef(({bsPrefix:t,className:e,htmlFor:s,...n},i)=>{
+const{controlId:r}=c.useContext(j);return t=S(t,"form-check-label"),o.jsx("label",{...n,ref:i,htmlFor:s||r,className:y(e,t)})
+});M.displayName="FormCheckLabel";const K=c.forwardRef(({id:t,bsPrefix:e,bsSwitchPrefix:s,inline:n=!1,reverse:i=!1,disabled:r=!1,isValid:a=!1,isInvalid:u=!1,feedbackTooltip:h=!1,feedback:d,feedbackType:p,className:v,style:f,title:N="",type:b="checkbox",label:C,children:g,as:m="input",...x},w)=>{
+e=S(e,"form-check"),s=S(s,"form-switch");const{controlId:U}=c.useContext(j),ie=c.useMemo(()=>({controlId:t||U}),[U,t]),J=!g&&C!=null&&C!==!1||be(g,M),re=o.jsx(L,{...x,type:b==="switch"?"checkbox":b,ref:w,isValid:a,isInvalid:u,disabled:r,as:m});return o.jsx(j.Provider,{value:ie,children:o.jsx("div",{style:f,className:y(v,J&&e,n&&`${e}-inline`,i&&`${e}-reverse`,b==="switch"&&s),children:g||o.jsxs(o.Fragment,{children:[re,J&&o.jsx(M,{title:N,children:C}),d&&o.jsx(E,{type:p,tooltip:h,children:d})]})})})
+});K.displayName="FormCheck";const I=Object.assign(K,{Input:L,Label:M}),Q=c.forwardRef(({bsPrefix:t,type:e,size:s,htmlSize:n,id:i,className:r,isValid:a=!1,isInvalid:u=!1,plaintext:h,readOnly:d,as:p="input",...v},f)=>{
+const{controlId:N}=c.useContext(j);return t=S(t,"form-control"),o.jsx(p,{...v,type:e,size:n,ref:f,readOnly:d,id:i||N,className:y(r,h?`${t}-plaintext`:t,s&&`${t}-${s}`,e==="color"&&`${t}-color`,a&&"is-valid",u&&"is-invalid")})
+});Q.displayName="FormControl";const Se=Object.assign(Q,{Feedback:E}),X=c.forwardRef(({className:t,bsPrefix:e,as:s="div",...n},i)=>(e=S(e,"form-floating"),o.jsx(s,{ref:i,className:y(t,e),...n})));X.displayName="FormFloating";const W=c.forwardRef(({controlId:t,as:e="div",...s},n)=>{
+const i=c.useMemo(()=>({controlId:t}),[t]);return o.jsx(j.Provider,{value:i,children:o.jsx(e,{...s,ref:n})})
+});W.displayName="FormGroup";const Y=c.forwardRef(({as:t="label",bsPrefix:e,column:s=!1,visuallyHidden:n=!1,className:i,htmlFor:r,...a},u)=>{
+const{controlId:h}=c.useContext(j);e=S(e,"form-label");let d="col-form-label";typeof s=="string"&&(d=`${d} ${d}-${s}`);const p=y(i,e,n&&"visually-hidden",s&&d);return r=r||h,s?o.jsx(le,{ref:u,as:"label",className:p,htmlFor:r,...a}):o.jsx(t,{ref:u,className:p,htmlFor:r,...a})
+});Y.displayName="FormLabel";const Z=c.forwardRef(({bsPrefix:t,className:e,id:s,...n},i)=>{
+const{controlId:r}=c.useContext(j);return t=S(t,"form-range"),o.jsx("input",{...n,type:"range",ref:i,className:y(e,t),id:s||r})
+});Z.displayName="FormRange";const P=c.forwardRef(({bsPrefix:t,size:e,htmlSize:s,className:n,isValid:i=!1,isInvalid:r=!1,id:a,...u},h)=>{
+const{controlId:d}=c.useContext(j);return t=S(t,"form-select"),o.jsx("select",{...u,size:s,ref:h,className:y(n,t,e&&`${t}-${e}`,i&&"is-valid",r&&"is-invalid"),id:a||d})
+});P.displayName="FormSelect";const ee=c.forwardRef(({bsPrefix:t,className:e,as:s="small",muted:n,...i},r)=>(t=S(t,"form-text"),o.jsx(s,{...i,ref:r,className:y(e,t,n&&"text-muted")})));ee.displayName="FormText";const te=c.forwardRef((t,e)=>o.jsx(I,{...t,ref:e,type:"switch"}));te.displayName="Switch";const ve=Object.assign(te,{Input:I.Input,Label:I.Label}),se=c.forwardRef(({bsPrefix:t,className:e,children:s,controlId:n,label:i,...r},a)=>(t=S(t,"form-floating"),o.jsxs(W,{ref:a,className:y(e,t),controlId:n,...r,children:[s,o.jsx("label",{htmlFor:n,children:i})]})));se.displayName="FloatingLabel";const we={_ref:k.any,validated:k.bool,as:k.elementType},B=c.forwardRef(({className:t,validated:e,as:s="form",...n},i)=>o.jsx(s,{...n,ref:i,className:y(t,e&&"was-validated")}));B.displayName="Form";B.propTypes=we;const V=Object.assign(B,{Group:W,Control:Se,Floating:X,Check:I,Switch:ve,Label:Y,Text:ee,Range:Z,Select:P,FloatingLabel:se}),ne=c.forwardRef(({bsPrefix:t,variant:e,animation:s="border",size:n,as:i="div",className:r,...a},u)=>{
+t=S(t,"spinner");const h=`${t}-${s}`;return o.jsx(i,{ref:u,...a,className:y(r,h,n&&`${h}-${n}`,e&&`text-${e}`)})
+});ne.displayName="Spinner";function F({memberRole:t,body:e}){
+const s=y("hexlet-content mt-3",{"text-end bg-body-secondary ms-5 p-3 rounded":t==="user"});return o.jsx("div",{className:s,children:o.jsx(ce,{children:e||""})})
+}function je({assistantThread:t,previousMessages:e,focusesCount:s,streamData:n}){
+const{t:i}=D(),r=i("assistant.disabled");if(!t)return o.jsx("div",{className:"mb-4",children:o.jsx(F,{memberRole:"assistant",body:r})});const{input:a,status:u,messages:h,submitMessage:d,handleInputChange:p}=n,v=c.useRef(null);return c.useEffect(()=>{
+var f;(f=v.current)==null||f.focus()
+},[s]),o.jsxs(o.Fragment,{children:[o.jsxs("div",{className:"mb-3",children:[o.jsx(F,{memberRole:"assistant",body:i("assistant.greeting")}),e.map(f=>o.jsx(F,{memberRole:f.role,body:f.body},f.id)),h.map(f=>o.jsx(F,{memberRole:f.role,body:f.body},f.id))]}),o.jsxs(V,{onSubmit:d,children:[o.jsx(V.Control,{ref:v,disabled:u==="in_progress",as:"textarea",rows:5,value:a,onChange:p}),o.jsxs("div",{className:"d-flex justify-content-end pt-3",children:[ae.language==="ru"&&o.jsx("a",{className:"btn btn-outline-primary me-2",target:"_blank",rel:"noreferrer",href:i("common.telegram_help_bot_url"),children:i("assistant.human")}),o.jsxs(de,{disabled:u!=="awaiting_message",type:"submit",children:[u==="in_progress"&&o.jsx(ne,{className:"me-2",as:"span",animation:"grow",size:"sm",role:"status","aria-hidden":"true"}),i("assistant.send")]})]})]})]})
+}var _={logger:typeof console<"u"?console:void 0,WebSocket:typeof WebSocket<"u"?WebSocket:void 0},l={log(...t){
+this.enabled&&(t.push(Date.now()),_.logger.log("[ActionCable]",...t))
+}};const R=()=>new Date().getTime(),T=t=>(R()-t)/1e3;class G{
+constructor(e){
+this.visibilityDidChange=this.visibilityDidChange.bind(this),this.connection=e,this.reconnectAttempts=0
+}start(){
+this.isRunning()||(this.startedAt=R(),delete this.stoppedAt,this.startPolling(),addEventListener("visibilitychange",this.visibilityDidChange),l.log(`ConnectionMonitor started. stale threshold = ${this.constructor.staleThreshold} s`))
+}stop(){
+this.isRunning()&&(this.stoppedAt=R(),this.stopPolling(),removeEventListener("visibilitychange",this.visibilityDidChange),l.log("ConnectionMonitor stopped"))
+}isRunning(){
+return this.startedAt&&!this.stoppedAt
+}recordMessage(){
+this.pingedAt=R()
+}recordConnect(){
+this.reconnectAttempts=0,delete this.disconnectedAt,l.log("ConnectionMonitor recorded connect")
+}recordDisconnect(){
+this.disconnectedAt=R(),l.log("ConnectionMonitor recorded disconnect")
+}startPolling(){
+this.stopPolling(),this.poll()
+}stopPolling(){
+clearTimeout(this.pollTimeout)
+}poll(){
+this.pollTimeout=setTimeout(()=>{
+this.reconnectIfStale(),this.poll()
+},this.getPollInterval())
+}getPollInterval(){
+const{staleThreshold:e,reconnectionBackoffRate:s}=this.constructor,n=Math.pow(1+s,Math.min(this.reconnectAttempts,10)),r=(this.reconnectAttempts===0?1:s)*Math.random();return e*1e3*n*(1+r)
+}reconnectIfStale(){
+this.connectionIsStale()&&(l.log(`ConnectionMonitor detected stale connection. reconnectAttempts = ${this.reconnectAttempts}, time stale = ${T(this.refreshedAt)} s, stale threshold = ${this.constructor.staleThreshold} s`),this.reconnectAttempts++,this.disconnectedRecently()?l.log(`ConnectionMonitor skipping reopening recent disconnect. time disconnected = ${T(this.disconnectedAt)} s`):(l.log("ConnectionMonitor reopening"),this.connection.reopen()))
+}get refreshedAt(){
+return this.pingedAt?this.pingedAt:this.startedAt
+}connectionIsStale(){
+return T(this.refreshedAt)>this.constructor.staleThreshold
+}disconnectedRecently(){
+return this.disconnectedAt&&T(this.disconnectedAt)<this.constructor.staleThreshold
+}visibilityDidChange(){
+document.visibilityState==="visible"&&setTimeout(()=>{
+(this.connectionIsStale()||!this.connection.isOpen())&&(l.log(`ConnectionMonitor reopening stale connection on visibilitychange. visibilityState = ${document.visibilityState}`),this.connection.reopen())
+},200)
+}
+}G.staleThreshold=6;G.reconnectionBackoffRate=.15;var oe={message_types:{welcome:"welcome",disconnect:"disconnect",ping:"ping",confirmation:"confirm_subscription",rejection:"reject_subscription"},default_mount_path:"/cable",protocols:["actioncable-v1-json","actioncable-unsupported"]};const{message_types:A,protocols:O}=oe,Ce=O.slice(0,O.length-1),z=[].indexOf;class H{
+constructor(e){
+this.open=this.open.bind(this),this.consumer=e,this.subscriptions=this.consumer.subscriptions,this.monitor=new G(this),this.disconnected=!0
+}send(e){
+return this.isOpen()?(this.webSocket.send(JSON.stringify(e)),!0):!1
+}open(){
+if(this.isActive())return l.log(`Attempted to open WebSocket, but existing socket is ${this.getState()}`),!1;{const e=[...O,...this.consumer.subprotocols||[]];return l.log(`Opening WebSocket, current state is ${this.getState()}, subprotocols: ${e}`),this.webSocket&&this.uninstallEventHandlers(),this.webSocket=new _.WebSocket(this.consumer.url,e),this.installEventHandlers(),this.monitor.start(),!0}
+}close({allowReconnect:e}={allowReconnect:!0}){
+if(e||this.monitor.stop(),this.isOpen())return this.webSocket.close()
+}reopen(){
+if(l.log(`Reopening WebSocket, current state is ${this.getState()}`),this.isActive())try{
+return this.close()
+}catch(e){
+l.log("Failed to reopen WebSocket",e)
+}finally{
+l.log(`Reopening WebSocket in ${this.constructor.reopenDelay}ms`),setTimeout(this.open,this.constructor.reopenDelay)
+}else return this.open()
+}getProtocol(){
+if(this.webSocket)return this.webSocket.protocol
+}isOpen(){
+return this.isState("open")
+}isActive(){
+return this.isState("open","connecting")
+}triedToReconnect(){
+return this.monitor.reconnectAttempts>0
+}isProtocolSupported(){
+return z.call(Ce,this.getProtocol())>=0
+}isState(...e){
+return z.call(e,this.getState())>=0
+}getState(){
+if(this.webSocket){
+for(let e in _.WebSocket)if(_.WebSocket[e]===this.webSocket.readyState)return e.toLowerCase()
+}return null
+}installEventHandlers(){
+for(let e in this.events){
+const s=this.events[e].bind(this);this.webSocket[`on${e}`]=s
+}
+}uninstallEventHandlers(){
+for(let e in this.events)this.webSocket[`on${e}`]=function(){}
+}
+}H.reopenDelay=500;H.prototype.events={message(t){
+if(!this.isProtocolSupported())return;const{identifier:e,message:s,reason:n,reconnect:i,type:r}=JSON.parse(t.data);switch(this.monitor.recordMessage(),r){
+case A.welcome:return this.triedToReconnect()&&(this.reconnectAttempted=!0),this.monitor.recordConnect(),this.subscriptions.reload();case A.disconnect:return l.log(`Disconnecting. Reason: ${n}`),this.close({allowReconnect:i});case A.ping:return null;case A.confirmation:return this.subscriptions.confirmSubscription(e),this.reconnectAttempted?(this.reconnectAttempted=!1,this.subscriptions.notify(e,"connected",{reconnected:!0})):this.subscriptions.notify(e,"connected",{reconnected:!1});case A.rejection:return this.subscriptions.reject(e);default:return this.subscriptions.notify(e,"received",s)
+}
+},open(){
+if(l.log(`WebSocket onopen event, using '${this.getProtocol()}' subprotocol`),this.disconnected=!1,!this.isProtocolSupported())return l.log("Protocol is unsupported. Stopping monitor and disconnecting."),this.close({allowReconnect:!1})
+},close(t){
+if(l.log("WebSocket onclose event"),!this.disconnected)return this.disconnected=!0,this.monitor.recordDisconnect(),this.subscriptions.notifyAll("disconnected",{willAttemptReconnect:this.monitor.isRunning()})
+},error(){
+l.log("WebSocket onerror event")
+}};const xe=function(t,e){
+if(e!=null)for(let s in e){
+const n=e[s];t[s]=n
+}return t
+};class ke{
+constructor(e,s={},n){
+this.consumer=e,this.identifier=JSON.stringify(s),xe(this,n)
+}perform(e,s={}){
+return s.action=e,this.send(s)
+}send(e){
+return this.consumer.send({command:"message",identifier:this.identifier,data:JSON.stringify(e)})
+}unsubscribe(){
+return this.consumer.subscriptions.remove(this)
+}
+}class Ae{
+constructor(e){
+this.subscriptions=e,this.pendingSubscriptions=[]
+}guarantee(e){
+this.pendingSubscriptions.indexOf(e)==-1?(l.log(`SubscriptionGuarantor guaranteeing ${e.identifier}`),this.pendingSubscriptions.push(e)):l.log(`SubscriptionGuarantor already guaranteeing ${e.identifier}`),this.startGuaranteeing()
+}forget(e){
+l.log(`SubscriptionGuarantor forgetting ${e.identifier}`),this.pendingSubscriptions=this.pendingSubscriptions.filter(s=>s!==e)
+}startGuaranteeing(){
+this.stopGuaranteeing(),this.retrySubscribing()
+}stopGuaranteeing(){
+clearTimeout(this.retryTimeout)
+}retrySubscribing(){
+this.retryTimeout=setTimeout(()=>{
+this.subscriptions&&typeof this.subscriptions.subscribe=="function"&&this.pendingSubscriptions.map(e=>{
+l.log(`SubscriptionGuarantor resubscribing ${e.identifier}`),this.subscriptions.subscribe(e)
+})
+},500)
+}
+}class Re{
+constructor(e){
+this.consumer=e,this.guarantor=new Ae(this),this.subscriptions=[]
+}create(e,s){
+const n=e,i=typeof n=="object"?n:{channel:n},r=new ke(this.consumer,i,s);return this.add(r)
+}add(e){
+return this.subscriptions.push(e),this.consumer.ensureActiveConnection(),this.notify(e,"initialized"),this.subscribe(e),e
+}remove(e){
+return this.forget(e),this.findAll(e.identifier).length||this.sendCommand(e,"unsubscribe"),e
+}reject(e){
+return this.findAll(e).map(s=>(this.forget(s),this.notify(s,"rejected"),s))
+}forget(e){
+return this.guarantor.forget(e),this.subscriptions=this.subscriptions.filter(s=>s!==e),e
+}findAll(e){
+return this.subscriptions.filter(s=>s.identifier===e)
+}reload(){
+return this.subscriptions.map(e=>this.subscribe(e))
+}notifyAll(e,...s){
+return this.subscriptions.map(n=>this.notify(n,e,...s))
+}notify(e,s,...n){
+let i;return typeof e=="string"?i=this.findAll(e):i=[e],i.map(r=>typeof r[s]=="function"?r[s](...n):void 0)
+}subscribe(e){
+this.sendCommand(e,"subscribe")&&this.guarantor.guarantee(e)
+}confirmSubscription(e){
+l.log(`Subscription confirmed ${e}`),this.findAll(e).map(s=>this.guarantor.forget(s))
+}sendCommand(e,s){
+const{identifier:n}=e;return this.consumer.send({command:s,identifier:n})
+}
+}class Ne{
+constructor(e){
+this._url=e,this.subscriptions=new Re(this),this.connection=new H(this),this.subprotocols=[]
+}get url(){
+return $e(this._url)
+}send(e){
+return this.connection.send(e)
+}connect(){
+return this.connection.open()
+}disconnect(){
+return this.connection.close({allowReconnect:!1})
+}ensureActiveConnection(){
+if(!this.connection.isActive())return this.connection.open()
+}addSubProtocol(e){
+this.subprotocols=[...this.subprotocols,e]
+}
+}function $e(t){
+if(typeof t=="function"&&(t=t()),t&&!/^wss?:/i.test(t)){
+const e=document.createElement("a");return e.href=t,e.href=e.href,e.protocol=e.protocol.replace("http","ws"),e.href
+}else return t
+}function Fe(t=Te("url")||oe.default_mount_path){
+return new Ne(t)
+}function Te(t){
+const e=document.head.querySelector(`meta[name='action-cable-${t}']`);if(e)return e.getAttribute("content")
+}const _e="wss://hexlet.io/cable",Me=Fe(_e);function Ie(t,e){
+const{enqueueSnackbar:s}=ue(),{t:n}=D(),[i,r]=c.useState([]),[a,u]=c.useState(""),[h,d]=c.useState("awaiting_message"),p=c.useRef({}),v=c.useRef(fe(b=>{
+const g=p.current[b].join("");r(m=>m.find(w=>w.id===b)?m.map(w=>w.id===b?{...w,body:g}:w):[...m,{id:b,role:"assistant",body:g}])
+},50)).current;return c.useEffect(()=>{
+const b=Me.subscriptions.create({channel:"AssistantChannel",id:t},{connected(){
+console.log("connected")
+},disconnected(){
+d("awaiting_message"),console.log("disconnected")
+},rejected(){
+console.log("rejected")
+},received(C){
+const{message_id:g,delta:m,index:x}=C;console.log(m),p.current[g]||(p.current[g]=[]),m[0]==="DONE"?(console.log("📡 Stream finished for message:",g),d("awaiting_message")):p.current[g][x]=m,v(g)
+}});return()=>{
+b.unsubscribe(),v.cancel()
+}
+},[t]),{messages:i,input:a,handleInputChange:b=>{
+u(b.target.value)
+},submitMessage:async b=>{
+var g;if(b.preventDefault(),!a.trim())return;d("in_progress");const C={id:crypto.randomUUID(),role:"user",body:a};r(m=>[...m,C]),u("");try{
+await q.post(pe(t),{message:a,output:e})
+}catch(m){
+if(d("awaiting_message"),q.isAxiosError(m)){
+if(((g=m.response)==null?void 0:g.status)===429){
+const x=n("assistant.disabled_html");r(w=>[...w,{id:crypto.randomUUID(),role:"assistant",body:x}])
+}s(m.message),console.error(m)
+}else throw m
+}
+},status:h}
+}function Ee(){
+const t=window.gon.assistant_thread,[e,s]=c.useState(!1),[n,i]=c.useState(0),r=()=>s(!1);c.useEffect(()=>{
+const d=document.querySelectorAll(".root-assistant-btn");for(const p of d)p.addEventListener("click",()=>{
+s(!0),i(v=>v+1)
+})
+},[]);const{t:a}=D(),u=a("assistant.disabled");let h=null;return t&&(h=Ie(t.id,"")),o.jsxs($,{placement:"end",className:"bg-body-light border-0",show:e,onHide:r,children:[o.jsx($.Header,{closeButton:!0,children:o.jsx($.Title,{as:"div",className:"h4",children:a("assistant.name")})}),o.jsx($.Body,{className:"my-3",children:o.jsxs(he,{fallback:o.jsx(me,{}),children:[!t&&o.jsx("div",{className:"mb-4",children:u}),t&&h&&o.jsx(je,{focusesCount:n,previousMessages:window.gon.assistant_thread_messages,assistantThread:t,streamData:h})]})})]})
+}function Oe(t={}){
+const e=document.getElementById("root-assistant-offcanvas");if(!e)throw new Error("root element is not found");ge.createRoot(e).render(o.jsx(Ee,{...t}))
+}Oe();

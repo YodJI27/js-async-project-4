@@ -88,8 +88,8 @@ const processResourceElement = ($el, attr, pageUrl, resourcesDir, resourcesDirNa
     return null;
   }
 
-  const extension = $el.attr('rel') === 'canonical' 
-    ? 'html' 
+  const extension = $el.attr('rel') === 'canonical'
+    ? 'html'
     : getExtensionFromUrl(absoluteUrl);
   const filename = generateFilename(absoluteUrl, extension);
   const resourcePath = path.join(resourcesDir, filename);
@@ -122,7 +122,7 @@ const collectResources = ($, pageUrl, outputDir, resourcesDirName) => {
     { selector: 'script', attr: 'src' },
   ];
 
-  return resourceTags.flatMap((tag) => 
+  return resourceTags.flatMap((tag) =>
     processResourceTag($, tag, pageUrl, resourcesDir, resourcesDirName)
   );
 };
@@ -139,7 +139,7 @@ const downloadResources = (resources) => {
           return fs.writeFile(resource.path, response.data)
             .then(() => {
               resource.element.attr(
-                resource.attr, 
+                resource.attr,
                 path.join(resource.resourcesDirName, resource.filename)
               );
             });
@@ -154,53 +154,56 @@ const downloadResources = (resources) => {
   return tasks.run();
 };
 
-const processHtml = async (html, pageUrl, outputDir) => {
+const processHtml = (html, pageUrl, outputDir) => {
   log(`Processing HTML for URL: ${pageUrl}`);
   const $ = cheerio.load(html);
   const resourcesDirName = generateFilename(pageUrl).replace('.html', '_files');
 
-  try {
-    await fs.access(outputDir, fs.constants.W_OK);
-    log(`Creating resources directory: ${resourcesDirName}`);
-    await fs.mkdir(path.join(outputDir, resourcesDirName), { recursive: true });
-  }
-  catch (error) {
-    throw new Error(`No access to directory ${outputDir}: ${error.message}`);
-  }
-
-  const resources = collectResources($, pageUrl, outputDir, resourcesDirName);
-  await downloadResources(resources);
-  return $.html();
+  return fs.access(outputDir, fs.constants.W_OK)
+    .then(() => {
+      log(`Creating resources directory: ${resourcesDirName}`);
+      return fs.mkdir(path.join(outputDir, resourcesDirName), { recursive: true });
+    })
+    .catch((error) => {
+      throw new Error(`No access to directory ${outputDir}: ${error.message}`);
+    })
+    .then(() => {
+      const resources = collectResources($, pageUrl, outputDir, resourcesDirName);
+      return downloadResources(resources)
+        .then(() => $.html());
+    });
 };
 
-const downloadPage = async (url, outputDir = process.cwd()) => {
-  try {
-    await fs.access(outputDir, fs.constants.W_OK);
-    
-    const response = await axios.get(url, {
-      responseType: 'text',
-      validateStatus: status => status === 200,
+const downloadPage = (url, outputDir = process.cwd()) => {
+  return fs.access(outputDir, fs.constants.W_OK)
+    .then(() => {
+      return axios.get(url, {
+        responseType: 'text',
+        validateStatus: status => status === 200,
+      });
+    })
+    .then((response) => {
+      const filename = generateFilename(url);
+      const filepath = path.join(outputDir, filename);
+
+      return processHtml(response.data, url, outputDir)
+        .then((processedHtml) => {
+          return fs.writeFile(filepath, processedHtml)
+            .then(() => filepath);
+        });
+    })
+    .catch((error) => {
+      if (error.response) {
+        throw new Error(`HTTP Error ${error.response.status} for ${url}`);
+      }
+      else if (error.code === 'ENOENT') {
+        throw new Error(`Directory does not exist: ${error.path}`);
+      }
+      else if (error.code === 'EACCES') {
+        throw new Error(`Permission denied for directory ${outputDir}`);
+      }
+      throw new Error(`Failed to download ${url}: ${error.message}`);
     });
-
-    const filename = generateFilename(url);
-    const filepath = path.join(outputDir, filename);
-
-    const processedHtml = await processHtml(response.data, url, outputDir);
-    await fs.writeFile(filepath, processedHtml);
-    return filepath;
-  }
-  catch (error) {
-    if (error.response) {
-      throw new Error(`HTTP Error ${error.response.status} for ${url}`);
-    }
-    else if (error.code === 'ENOENT') {
-      throw new Error(`Directory does not exist: ${error.path}`);
-    }
-    else if (error.code === 'EACCES') {
-      throw new Error(`Permission denied for directory ${outputDir}`);
-    }
-    throw new Error(`Failed to download ${url}: ${error.message}`);
-  }
 };
 
 export default downloadPage;
