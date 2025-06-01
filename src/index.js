@@ -19,7 +19,7 @@ axiosDebug({
       'Response:',
       response.status,
       response.statusText,
-      `(${response.config.method?.toUpperCase()} ${response.config.url})`
+      `(${response.config.method?.toUpperCase()} ${response.config.url})`,
     )
   },
   error(debug, error) {
@@ -33,9 +33,9 @@ axiosDebug({
       response.status,
       response.statusText,
       response.data?.message || '',
-      `(${response.config.method?.toUpperCase()} ${response.config.url})`
+      `(${response.config.method?.toUpperCase()} ${response.config.url})`,
     )
-  }
+  },
 }, debug('axios'))
 
 const isLocalResource = (resourceUrl, pageUrl) => {
@@ -123,7 +123,7 @@ const collectResources = ($, pageUrl, outputDir, resourcesDirName) => {
   ]
 
   return resourceTags.flatMap(tag =>
-    processResourceTag($, tag, pageUrl, resourcesDir, resourcesDirName)
+    processResourceTag($, tag, pageUrl, resourcesDir, resourcesDirName),
   )
 }
 
@@ -140,7 +140,7 @@ const downloadResources = (resources) => {
             .then(() => {
               resource.element.attr(
                 resource.attr,
-                path.join(resource.resourcesDirName, resource.filename)
+                path.join(resource.resourcesDirName, resource.filename),
               )
             })
         })
