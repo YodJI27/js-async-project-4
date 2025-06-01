@@ -1,3 +1,0 @@
-import{u as x,c as B}from"./ThemeProvider-BCC4u8C0.js";import{r as l,j as N}from"./index-f3ZQ7e7G.js";import{u as $}from"./Button-CaTNTFyi.js";const j=l.forwardRef(({as:e,bsPrefix:m,variant:s="primary",size:a,active:n=!1,disabled:t=!1,className:f,...o},u)=>{
-const r=x(m,"btn"),[c,{tagName:p}]=$({tagName:e,disabled:t,...o}),i=p;return N.jsx(i,{...c,...o,ref:u,disabled:t,className:B(f,r,n&&"active",s&&`${r}-${s}`,a&&`${r}-${a}`,o.href&&t&&"disabled")})
-});j.displayName="Button";export{j as B};
