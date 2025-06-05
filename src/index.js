@@ -19,7 +19,7 @@ axiosDebug({
       'Response:',
       response.status,
       response.statusText,
-      `(${response.config.method?.toUpperCase()} ${response.config.url})`
+      `(${response.config.method?.toUpperCase()} ${response.config.url})`,
     )
   },
   error(debug, error) {
@@ -33,9 +33,9 @@ axiosDebug({
       response.status,
       response.statusText,
       response.data?.message || '',
-      `(${response.config.method?.toUpperCase()} ${response.config.url})`
+      `(${response.config.method?.toUpperCase()} ${response.config.url})`,
     )
-  }
+  },
 }, debug('axios'))
 
 const isLocalResource = (resourceUrl, pageUrl) => {
@@ -105,10 +105,10 @@ const processHtml = (html, pageUrl, outputDir) => {
           .toArray()
           .map(el => $(el))
           .filter($el => $el.attr(attr))
-          .map($el => {
+          .map(($el) => {
             const resourceUrl = $el.attr(attr)
             const absoluteUrl = new URL(resourceUrl, pageUrl).toString()
-            
+
             if (!isLocalResource(absoluteUrl, pageUrl)) {
               log(`Skipping external resource: ${absoluteUrl}`)
               return null
