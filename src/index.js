@@ -4,24 +4,39 @@ import path from 'path'
 import * as cheerio from 'cheerio'
 import debug from 'debug'
 import Listr from 'listr'
+import axiosDebug from 'axios-debug-log'
 
 // Настройка логирования
 const log = debug('page-loader')
-const axiosLog = debug('axios')
 
-// Включение логирования для axios
-axios.interceptors.request.use((config) => {
-  axiosLog('Request:', config.method, config.url)
-  return config
-})
-
-axios.interceptors.response.use((response) => {
-  axiosLog('Response:', response.status, response.config.url)
-  return response
-}, (error) => {
-  axiosLog('Error:', error.message, error.config?.url)
-  return Promise.reject(error)
-})
+// Включение логирования для axios только в debug режиме
+axiosDebug({
+  request(debug, config) {
+    debug('Request:', config.method?.toUpperCase(), config.url)
+  },
+  response(debug, response) {
+    debug(
+      'Response:',
+      response.status,
+      response.statusText,
+      `(${response.config.method?.toUpperCase()} ${response.config.url})`
+    )
+  },
+  error(debug, error) {
+    if (!error.response) {
+      debug('Error:', error.message, `(${error.config?.method?.toUpperCase()} ${error.config?.url})`)
+      return
+    }
+    const { response } = error
+    debug(
+      'Error:',
+      response.status,
+      response.statusText,
+      response.data?.message || '',
+      `(${response.config.method?.toUpperCase()} ${response.config.url})`
+    )
+  }
+}, debug('axios'))
 
 const isLocalResource = (resourceUrl, pageUrl) => {
   try {
@@ -86,18 +101,20 @@ const processHtml = (html, pageUrl, outputDir) => {
       ]
 
       const resources = resourceTags.flatMap(({ selector, attr }) => {
-        return $(selector).map((i, el) => {
-          const resourceUrl = $(el).attr(attr)
-          if (!resourceUrl) return null
-
-          try {
+        return $(selector)
+          .toArray()
+          .map(el => $(el))
+          .filter($el => $el.attr(attr))
+          .map($el => {
+            const resourceUrl = $el.attr(attr)
             const absoluteUrl = new URL(resourceUrl, pageUrl).toString()
+            
             if (!isLocalResource(absoluteUrl, pageUrl)) {
               log(`Skipping external resource: ${absoluteUrl}`)
               return null
             }
 
-            const extension = $(el).attr('rel') === 'canonical'
+            const extension = $el.attr('rel') === 'canonical'
               ? 'html'
               : getExtensionFromUrl(absoluteUrl)
             const filename = generateFilename(absoluteUrl, extension)
@@ -107,16 +124,12 @@ const processHtml = (html, pageUrl, outputDir) => {
               url: absoluteUrl,
               path: resourcePath,
               filename,
-              element: $(el),
+              element: $el,
               attr,
               resourcesDirName,
             }
-          }
-          catch (error) {
-            log(`Failed to process resource ${resourceUrl}: ${error.message}`)
-            return null
-          }
-        }).get().filter(Boolean)
+          })
+          .filter(Boolean)
       })
 
       const tasks = new Listr(resources.map(resource => ({
