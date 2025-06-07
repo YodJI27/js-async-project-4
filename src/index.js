@@ -124,7 +124,7 @@ const processHtml = (html, pageUrl, outputDir) => {
               resourcesDirName,
             }
           })
-          .filter(resource => {
+          .filter((resource) => {
             const isLocal = isLocalResource(resource.url, pageUrl)
             if (!isLocal) {
               log(`Skipping external resource: ${resource.url}`)
