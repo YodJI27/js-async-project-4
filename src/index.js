@@ -109,11 +109,6 @@ const processHtml = (html, pageUrl, outputDir) => {
             const resourceUrl = $el.attr(attr)
             const absoluteUrl = new URL(resourceUrl, pageUrl).toString()
 
-            if (!isLocalResource(absoluteUrl, pageUrl)) {
-              log(`Skipping external resource: ${absoluteUrl}`)
-              return null
-            }
-
             const extension = $el.attr('rel') === 'canonical'
               ? 'html'
               : getExtensionFromUrl(absoluteUrl)
@@ -129,7 +124,13 @@ const processHtml = (html, pageUrl, outputDir) => {
               resourcesDirName,
             }
           })
-          .filter(Boolean)
+          .filter(resource => {
+            const isLocal = isLocalResource(resource.url, pageUrl)
+            if (!isLocal) {
+              log(`Skipping external resource: ${resource.url}`)
+            }
+            return isLocal
+          })
       })
 
       const tasks = new Listr(resources.map(resource => ({

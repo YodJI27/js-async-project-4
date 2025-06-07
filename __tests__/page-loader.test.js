@@ -6,6 +6,11 @@ import os from 'os'
 import path from 'path'
 import debug from 'debug'
 import downloadPage from '../src/index.js'
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 // Включаем логирование для тестов
 debug.enable('page-loader,axios,nock')
@@ -17,26 +22,13 @@ describe('page-loader', () => {
   const url = `${baseUrl}/courses`
   const expectedFilename = 'ru-hexlet-io-courses.html'
   const expectedResourcesDir = 'ru-hexlet-io-courses_files'
+  let pageContent
 
   // Фикстура из задания
-  const pageContent = `<!DOCTYPE html>
-    <html lang="ru">
-      <head>
-        <meta charset="utf-8">
-        <title>Курсы по программированию Хекслет</title>
-        <link rel="stylesheet" media="all" href="https://cdn2.hexlet.io/assets/menu.css">
-        <link rel="stylesheet" media="all" href="/assets/application.css" />
-        <link href="/courses" rel="canonical">
-      </head>
-      <body>
-        <img src="/assets/professions/nodejs.png" alt="Иконка профессии Node.js-программист" />
-        <h3>
-          <a href="/professions/nodejs">Node.js-программист</a>
-        </h3>
-        <script src="https://js.stripe.com/v3/"></script>
-        <script src="https://ru.hexlet.io/packs/js/runtime.js"></script>
-      </body>
-    </html>`
+  beforeAll(async () => {
+    const fixturePath = path.join(__dirname, '..', '__fixtures__', 'initialHTML.txt')
+    pageContent = await fs.readFile(fixturePath, 'utf-8')
+  })
 
   beforeEach(async () => {
     log('Creating temp directory')
